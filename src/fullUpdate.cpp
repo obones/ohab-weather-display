@@ -177,7 +177,7 @@ getStateResult getLatestStateFromOpenHAB()
     WiFiClient wifiClient;   // wifi client object
     wifiClient.stop(); // close connection before sending a new request
     HTTPClient http;
-    String uri = String("/rest/items") + OpenHABItemName; //http://server:8080/rest/items/ope
+    String uri = String("/rest/items/") + OpenHABItemName; //http://server:8080/rest/items/ope
 
     http.begin(wifiClient, OpenHABServerName, OpenHABServerPort, uri); //http.begin(uri,test_root_ca); //HTTPS example connection
     int httpCode = http.GET();
