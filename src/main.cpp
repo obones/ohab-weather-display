@@ -77,9 +77,33 @@ void setup()
     if (WakeUp) */
     {
         if (EventCnt % 5 == 0)
-        DoFullUpdate();
+        {
+            DoFullUpdate();
+        }
         else
-        DoPartialUpdate();
+        {
+            CurrentSec += SleepDuration;
+            if (CurrentSec > 59)
+            {
+                CurrentSec %= 60;
+                CurrentMin += 1;
+
+                if (CurrentMin > 59)
+                {
+                    CurrentMin %= 60;
+                    CurrentHour += 1;
+
+                    if (CurrentHour > 23)
+                    {
+                        CurrentHour = 0;
+                        CurrentMin = 0;
+                        CurrentSec = 0;
+                    }
+                }
+            }
+
+            DoPartialUpdate();
+        }
     }
 
     EventCnt++;
