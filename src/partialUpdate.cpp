@@ -17,13 +17,19 @@
 #include "screenDimensions.h"
 #include "timeManagement.h"
 #include "drawPrimitives.h"
+#include "fontManagement.h"
+#include "fonts/opensans16.h"
+#include "fonts/opensanslight48.h"
 
+#define PARTIAL_AREA_WIDTH 300
+#define PARTIAL_AREA_HEIGHT 150
+#define PARTIAL_AREA_MARGIN 10
 #define BATT_PIN   (14)
 
 Rect_t partialUpdateArea = 
     {
-        .x = SCREEN_WIDTH / 2, //SCREEN_WIDTH - PARTIAL_AREA_WIDTH - 10,
-        .y = SCREEN_HEIGHT / 2, //10,
+        .x = SCREEN_WIDTH - PARTIAL_AREA_WIDTH,
+        .y = PARTIAL_AREA_MARGIN,
         .width = PARTIAL_AREA_WIDTH,
         .height = PARTIAL_AREA_HEIGHT
     };
@@ -65,7 +71,8 @@ void refreshBattery()
     uint16_t v = analogRead(BATT_PIN);
     float battery_voltage = ((float)v / 4095.0) * 2.0 * 3.3 * (vref / 1000.0);
 
-    drawString(partialUpdateArea.x, partialUpdateArea.y + partialUpdateArea.height / 2, String(battery_voltage), LEFT);
+    setFont(OpenSans16);
+    drawString(partialUpdateArea.x + partialUpdateArea.width - PARTIAL_AREA_MARGIN, partialUpdateArea.y + partialUpdateArea.height - 40, String(battery_voltage), RIGHT);
 }
 
 void refreshTime()
@@ -76,19 +83,16 @@ void refreshTime()
     timeInfo.tm_sec = CurrentSec;
 
     char updateTime[30];
-    strftime(updateTime, sizeof(updateTime), "%H:%M:%S", &timeInfo);
-    drawString(partialUpdateArea.x, partialUpdateArea.y, updateTime, LEFT);
+    strftime(updateTime, sizeof(updateTime), "%H:%M", &timeInfo);
+
+    setFont(OpenSansLight48);
+    drawString(partialUpdateArea.x + partialUpdateArea.width - PARTIAL_AREA_MARGIN, partialUpdateArea.y, updateTime, RIGHT);
 }
 
 void DoPartialUpdate()
 {
     epd_poweron();      // Switch on EPD display
-    //epd_clear_area(partialUpdateArea);
-    epd_clear_area_cycles(partialUpdateArea, 2, 50);
-
-    drawLine(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, Black);
-    drawLine(SCREEN_WIDTH / 2 + 10, 0, SCREEN_WIDTH / 2 + 10, SCREEN_HEIGHT, Black);
-    //drawLine(0, 0, PARTIAL_AREA_WIDTH - 2, PARTIAL_AREA_HEIGHT - 2, Black);
+    epd_clear_area_cycles(partialUpdateArea, 1, 50);
 
     refreshBattery();
     refreshTime();
