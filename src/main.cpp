@@ -20,6 +20,7 @@
 #include "partialUpdate.h"
 #include "fullUpdate.h"
 #include "screenDimensions.h"
+#include "drawPrimitives.h"
 #include "timeManagement.h"
 
 const long SleepDuration   = 1; //60; // Sleep time in minutes, aligned to the nearest minute boundary, so if 30 will always update at 00 or 30 past the hour
@@ -57,13 +58,9 @@ void InitializeSystem()
     Serial.println(String(__FILE__) + "\nStarting...");
     epd_init();
     
-    FullScreenFrameBuffer = (uint8_t *)ps_calloc(sizeof(uint8_t), EPD_WIDTH * EPD_HEIGHT / 2);
-    if (!FullScreenFrameBuffer) Serial.println("Full Screen Memory alloc failed!");
-    memset(FullScreenFrameBuffer, 0xFF, EPD_WIDTH * EPD_HEIGHT / 2);
-    
-    PartialAreaFrameBuffer = (uint8_t *)ps_calloc(sizeof(uint8_t), PARTIAL_AREA_WIDTH * PARTIAL_AREA_HEIGHT / 2);
-    if (!PartialAreaFrameBuffer) Serial.println("Partial Area Memory alloc failed!");
-    memset(PartialAreaFrameBuffer, 0xFF, PARTIAL_AREA_WIDTH * PARTIAL_AREA_HEIGHT / 2);
+    FrameBuffer = (uint8_t *)ps_calloc(sizeof(uint8_t), EPD_WIDTH * EPD_HEIGHT / 2);
+    if (!FrameBuffer) Serial.println("Full Screen Memory alloc failed!");
+    memset(FrameBuffer, 0xFF, EPD_WIDTH * EPD_HEIGHT / 2);
 }
 
 void setup() 

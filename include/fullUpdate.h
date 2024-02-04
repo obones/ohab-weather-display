@@ -13,8 +13,6 @@
 #ifndef FULL_UPDATE_H
 #define FULL_UPDATE_H
 
-extern uint8_t *FullScreenFrameBuffer;
-
 void DoFullUpdate();
 
 #endif
