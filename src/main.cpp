@@ -20,6 +20,7 @@
 #include "partialUpdate.h"
 #include "fullUpdate.h"
 #include "screenDimensions.h"
+#include "timeManagement.h"
 
 const long SleepDuration   = 1; //60; // Sleep time in minutes, aligned to the nearest minute boundary, so if 30 will always update at 00 or 30 past the hour
 const int  WakeupHour      = 8;  // Don't wakeup until after 07:00 to save battery power
@@ -28,9 +29,6 @@ const long Delta           = 30; // ESP32 rtc speed compensation, prevents displ
 
 long StartTime       = 0;
 
-int CurrentHour = 0;
-int CurrentMin = 0;
-int CurrentSec = 0;
 RTC_DATA_ATTR int EventCnt = 0;
 
 uint8_t *FrameBuffer;
