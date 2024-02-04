@@ -14,3 +14,6 @@
 
 #define SCREEN_WIDTH   EPD_WIDTH
 #define SCREEN_HEIGHT  EPD_HEIGHT
+
+extern uint8_t *FrameBuffer;
+
