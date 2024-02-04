@@ -28,6 +28,7 @@
 #include "fontManagement.h"
 #include "timeManagement.h"
 #include "constants.h"
+#include "partialUpdate.h"
 
 String Time_str = "--:--:--";
 String Date_str = "-- --- ----";
@@ -216,6 +217,7 @@ void DoFullUpdate()
     switch (stateResult)
     {
         case Success:
+            DrawPartialUpdateElements();
             DisplayWindSection(137, 150, 240, 20, 100);
             break;
         case WifiIssue:

@@ -94,10 +94,15 @@ void DoPartialUpdate()
     epd_poweron();      // Switch on EPD display
     epd_clear_area_cycles(partialUpdateArea, 1, 50);
 
-    refreshBattery();
-    refreshTime();
+    DrawPartialUpdateElements();
 
     edp_partial_update();       // Update the display to show the information
     epd_poweroff_all(); // Switch off all power to EPD
+}
+
+void DrawPartialUpdateElements()
+{
+    refreshBattery();
+    refreshTime();
 }
 
