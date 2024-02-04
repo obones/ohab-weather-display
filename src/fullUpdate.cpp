@@ -19,6 +19,7 @@
 #include "lang.h"
 
 #include "screenDimensions.h"
+#include "fonts/opensans8.h"
 #include "fonts/opensans8b.h"
 #include "fonts/opensans12b.h"
 #include "fonts/opensans24b.h"
@@ -188,7 +189,12 @@ getStateResult getLatestStateFromOpenHAB()
     }
     else
     {
-        Serial.printf("connection failed, error: %s", http.errorToString(httpCode).c_str());
+        String errorString = http.errorToString(httpCode);
+        setFont(OpenSans8);
+        drawString(150, 10, uri, LEFT);
+        drawString(150, 10, errorString, LEFT);
+
+        Serial.printf("connection failed, error: %s", errorString.c_str());
         wifiClient.stop();
         http.end();
         return ServerIssue;
@@ -219,14 +225,18 @@ void DoFullUpdate()
             issueText = "Failed to retrieve time!";
             break;
         case ServerIssue:
-            issueText = "Failed to communicate with OpenHAB server!";
+            setFont(OpenSans8);
+            drawString(10, 10, OpenHABServerName, LEFT);
+            drawString(10, 20, String(OpenHABServerPort), LEFT);
+            drawString(10, 30, OpenHABItemName, LEFT);
+            issueText = "Failed to communicate\nwith OpenHAB server!";
             break;
     }
 
     if (!issueText.isEmpty())
     {
         setFont(OpenSans26B);
-        drawString(0, SCREEN_HEIGHT / 2, issueText, CENTER);
+        drawString(10, SCREEN_HEIGHT / 2, issueText, LEFT);
     }
 
     edp_update();       // Update the display to show the information
