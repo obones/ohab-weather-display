@@ -13,25 +13,25 @@
 #include <time.h>
 #include <esp_adc_cal.h>
 #include <HardwareSerial.h>
+#include "partialUpdate.h"
 #include "screenDimensions.h"
 #include "timeManagement.h"
 #include "drawPrimitives.h"
 
-#define AREA_WIDTH 50
-#define AREA_HEIGHT 50
 #define BATT_PIN   (14)
 
 Rect_t partialUpdateArea = 
     {
-        .x = SCREEN_WIDTH - AREA_WIDTH,
-        .y = 0,
-        .width = AREA_WIDTH,
-        .height = AREA_HEIGHT
+        .x = SCREEN_WIDTH - PARTIAL_AREA_WIDTH - 10,
+        .y = 10,
+        .width = PARTIAL_AREA_WIDTH,
+        .height = PARTIAL_AREA_HEIGHT
     };
+uint8_t *PartialAreaFrameBuffer;
 
 void edp_partial_update() 
 {
-    epd_draw_grayscale_image(partialUpdateArea, FrameBuffer); // Update the screen
+    epd_draw_grayscale_image(partialUpdateArea, PartialAreaFrameBuffer); // Update the screen
 }
 
 void refreshBattery()
@@ -72,6 +72,8 @@ void refreshTime()
 
 void DoPartialUpdate()
 {
+    FrameBuffer = PartialAreaFrameBuffer;
+
     epd_poweron();      // Switch on EPD display
     epd_clear_area(partialUpdateArea);
 

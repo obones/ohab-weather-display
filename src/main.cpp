@@ -31,13 +31,11 @@ long StartTime       = 0;
 
 RTC_DATA_ATTR int EventCnt = 0;
 
-uint8_t *FrameBuffer;
-
 void BeginSleep() 
 {
     epd_poweroff_all();
     //UpdateLocalTime();
-    long SleepTimer = (SleepDuration * 60 - ((CurrentMin % SleepDuration) * 60 + CurrentSec)) + Delta; //Some ESP32 have a RTC that is too fast to maintain accurate time, so add an offset
+    long SleepTimer = 5; //(SleepDuration * 60 - ((CurrentMin % SleepDuration) * 60 + CurrentSec)) + Delta; //Some ESP32 have a RTC that is too fast to maintain accurate time, so add an offset
     esp_sleep_enable_timer_wakeup(SleepTimer * 1000000LL); // in Secs, 1000000LL converts to Secs as unit = 1uSec
     Serial.println("Awake for : " + String((millis() - StartTime) / 1000.0, 3) + "-secs");
     Serial.println("Entering " + String(SleepTimer) + " (secs) of sleep time");
@@ -59,9 +57,13 @@ void InitializeSystem()
     Serial.println(String(__FILE__) + "\nStarting...");
     epd_init();
     
-    FrameBuffer = (uint8_t *)ps_calloc(sizeof(uint8_t), EPD_WIDTH * EPD_HEIGHT / 2);
-    if (!FrameBuffer) Serial.println("Memory alloc failed!");
-    memset(FrameBuffer, 0xFF, EPD_WIDTH * EPD_HEIGHT / 2);
+    FullScreenFrameBuffer = (uint8_t *)ps_calloc(sizeof(uint8_t), EPD_WIDTH * EPD_HEIGHT / 2);
+    if (!FullScreenFrameBuffer) Serial.println("Full Screen Memory alloc failed!");
+    memset(FullScreenFrameBuffer, 0xFF, EPD_WIDTH * EPD_HEIGHT / 2);
+    
+    PartialAreaFrameBuffer = (uint8_t *)ps_calloc(sizeof(uint8_t), PARTIAL_AREA_WIDTH * PARTIAL_AREA_HEIGHT / 2);
+    if (!PartialAreaFrameBuffer) Serial.println("Partial Area Memory alloc failed!");
+    memset(PartialAreaFrameBuffer, 0xFF, PARTIAL_AREA_WIDTH * PARTIAL_AREA_HEIGHT / 2);
 }
 
 void setup() 

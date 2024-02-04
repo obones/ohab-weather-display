@@ -19,6 +19,8 @@
 #include "drawPrimitives.h"
 #include "fontManagement.h"
 
+ uint8_t *FrameBuffer;
+
 void drawString(int x, int y, String text, alignment align) 
 {
     char * data  = const_cast<char*>(text.c_str());

@@ -13,6 +13,11 @@
 #ifndef PARTIAL_UPDATE_H
 #define PARTIAL_UPDATE_H
 
+#define PARTIAL_AREA_WIDTH 100
+#define PARTIAL_AREA_HEIGHT 100
+
+extern uint8_t *PartialAreaFrameBuffer;
+
 void DoPartialUpdate();
 
 #endif

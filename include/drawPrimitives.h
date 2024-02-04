@@ -13,6 +13,9 @@
 #pragma once
 #include <WString.h>
 
+// MUST BE set before any of the methods below are called
+extern uint8_t *FrameBuffer;
+
 enum alignment {LEFT, RIGHT, CENTER};
 #define White         0xFF
 #define LightGrey     0xBB

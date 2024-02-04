@@ -32,10 +32,11 @@
 String Time_str = "--:--:--";
 String Date_str = "-- --- ----";
 int wifi_signal;
+uint8_t *FullScreenFrameBuffer;
 
 void edp_update() 
 {
-  epd_draw_grayscale_image(epd_full_screen(), FrameBuffer); // Update the screen
+  epd_draw_grayscale_image(epd_full_screen(), FullScreenFrameBuffer); // Update the screen
 }
 
 String WindDegToOrdinalDirection(float windDirection) 
@@ -206,6 +207,8 @@ getStateResult getLatestStateFromOpenHAB()
 
 void DoFullUpdate()
 {
+    FrameBuffer = FullScreenFrameBuffer;
+
     getStateResult stateResult = getLatestStateFromOpenHAB();
     StopWiFi();
 
