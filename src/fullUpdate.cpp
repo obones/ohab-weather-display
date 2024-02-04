@@ -12,6 +12,9 @@
  */
 #include <math.h>
 #include <Arduino.h>
+#include <WiFi.h>
+#include <time.h>
+#include <HTTPClient.h>
 
 #include "lang.h"
 
@@ -19,8 +22,15 @@
 #include "fonts/opensans8b.h"
 #include "fonts/opensans12b.h"
 #include "fonts/opensans24b.h"
+#include "fonts/opensans26b.h"
 #include "drawPrimitives.h"
 #include "fontManagement.h"
+#include "timeManagement.h"
+#include "constants.h"
+
+String Time_str = "--:--:--";
+String Date_str = "-- --- ----";
+int wifi_signal;
 
 void edp_update() 
 {
@@ -85,12 +95,139 @@ void DisplayWindSection(int x, int y, float angle, float windSpeed, int compassR
     drawString(x, y + 25, "km/h", CENTER);
 }
 
+boolean UpdateLocalTime() 
+{
+    struct tm timeInfo;
+    char   time_output[30], day_output[30], update_time[30];
+    while (!getLocalTime(&timeInfo, 5000)) // Wait for 5-sec for time to synchronize
+    {
+        Serial.println("Failed to obtain time");
+        return false;
+    }
+    CurrentHour = timeInfo.tm_hour;
+    CurrentMin  = timeInfo.tm_min;
+    CurrentSec  = timeInfo.tm_sec;
+    //See http://www.cplusplus.com/reference/ctime/strftime/
+
+    sprintf(day_output, "%s, %02u %s %04u", weekday_D[timeInfo.tm_wday], timeInfo.tm_mday, month_M[timeInfo.tm_mon], (timeInfo.tm_year) + 1900);
+    strftime(update_time, sizeof(update_time), "%H:%M:%S", &timeInfo);  // Creates: '@ 14:05:49'   and change from 30 to 8 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    sprintf(time_output, "%s", update_time);
+
+    Date_str = day_output;
+    Time_str = time_output;
+    return true;
+}
+
+boolean SetupTime() 
+{
+    configTime(gmtOffset_sec, daylightOffset_sec, ntpServer, "time.nist.gov"); //(gmtOffset_sec, daylightOffset_sec, ntpServer)
+    setenv("TZ", Timezone, 1);  //setenv()adds the "TZ" variable to the environment with a value TimeZone, only used if set to 1, 0 means no change
+    tzset(); // Set the TZ environment variable
+    delay(100);
+    return UpdateLocalTime();
+}
+
+uint8_t StartWiFi() 
+{
+    Serial.println("\r\nConnecting to: " + String(ssid));
+    WiFi.disconnect();
+    WiFi.mode(WIFI_STA); // switch off AP
+    WiFi.setAutoConnect(true);
+    WiFi.setAutoReconnect(true);
+    WiFi.begin(ssid, password);
+    if (WiFi.waitForConnectResult() != WL_CONNECTED) 
+    {
+        Serial.printf("STA: Failed!\n");
+        WiFi.disconnect(false);
+        delay(500);
+        WiFi.begin(ssid, password);
+    }
+
+    if (WiFi.status() == WL_CONNECTED) 
+    {
+        wifi_signal = WiFi.RSSI(); // Get Wifi Signal strength now, because the WiFi will be turned off to save power!
+        Serial.println("WiFi connected at: " + WiFi.localIP().toString());
+    }
+    else
+    { 
+        Serial.println("WiFi connection *** FAILED ***");
+    }
+
+    return WiFi.status();
+}
+
+void StopWiFi() 
+{
+    WiFi.disconnect();
+    WiFi.mode(WIFI_OFF);
+    Serial.println("WiFi switched Off");
+}
+
+enum getStateResult {Success, WifiIssue, TimeIssue, ServerIssue};
+
+getStateResult getLatestStateFromOpenHAB()
+{
+    if (StartWiFi() != WL_CONNECTED)
+        return WifiIssue;
+
+    if (!SetupTime())
+        return TimeIssue;
+
+    WiFiClient wifiClient;   // wifi client object
+    wifiClient.stop(); // close connection before sending a new request
+    HTTPClient http;
+    String uri = String("/rest/items") + OpenHABItemName; //http://server:8080/rest/items/ope
+
+    http.begin(wifiClient, OpenHABServerName, OpenHABServerPort, uri); //http.begin(uri,test_root_ca); //HTTPS example connection
+    int httpCode = http.GET();
+    if (httpCode == HTTP_CODE_OK) 
+    {
+        wifiClient.stop();
+        http.end();
+        return Success;
+    }
+    else
+    {
+        Serial.printf("connection failed, error: %s", http.errorToString(httpCode).c_str());
+        wifiClient.stop();
+        http.end();
+        return ServerIssue;
+    }
+    http.end();
+    
+    return Success;
+}
+
 void DoFullUpdate()
 {
+    getStateResult stateResult = getLatestStateFromOpenHAB();
+    StopWiFi();
+
     epd_poweron();      // Switch on EPD display
     epd_clear();        // Clear the screen
 
-    DisplayWindSection(137, 150, 240, 20, 100);
+    String issueText = "";
+    switch (stateResult)
+    {
+        case Success:
+            DisplayWindSection(137, 150, 240, 20, 100);
+            break;
+        case WifiIssue:
+            issueText = "Failed to connect to WiFi!";
+            break;
+        case TimeIssue:
+            issueText = "Failed to retrieve time!";
+            break;
+        case ServerIssue:
+            issueText = "Failed to communicate with OpenHAB server!";
+            break;
+    }
+
+    if (!issueText.isEmpty())
+    {
+        setFont(OpenSans26B);
+        drawString(0, SCREEN_HEIGHT / 2, issueText, CENTER);
+    }
 
     edp_update();       // Update the display to show the information
     epd_poweroff_all(); // Switch off all power to EPD

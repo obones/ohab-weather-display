@@ -30,3 +30,9 @@ const String TXT_W   = "O";
 const String TXT_WNW = "ONO";
 const String TXT_NW  = "NO";
 const String TXT_NNW = "NNO";
+
+//Day of the week
+const char* weekday_D[] = { "Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam" };
+
+//Month
+const char* month_M[] = { "Jan", "Fév", "Mar", "Avr", "Mai", "Jun", "Jul", "Aou", "Sep", "Oct", "Nov", "Déc" };
