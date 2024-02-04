@@ -10,8 +10,9 @@
  *
  * SPDX-License-Identifier: MPL-2.0
  */
+#include <esp_attr.h>
 #include "timeManagement.h"
 
-int CurrentHour = 0;
-int CurrentMin = 0;
-int CurrentSec = 0;
+RTC_DATA_ATTR int CurrentHour = 0;
+RTC_DATA_ATTR int CurrentMin = 0;
+RTC_DATA_ATTR int CurrentSec = 0;
