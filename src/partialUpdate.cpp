@@ -18,13 +18,13 @@
 #include "timeManagement.h"
 #include "drawPrimitives.h"
 #include "fontManagement.h"
+#include "pins.h"
 #include "fonts/opensans16.h"
 #include "fonts/opensanslight48.h"
 
 #define PARTIAL_AREA_WIDTH 300
 #define PARTIAL_AREA_HEIGHT 150
 #define PARTIAL_AREA_MARGIN 10
-#define BATT_PIN   (14)
 
 Rect_t partialUpdateArea = 
     {
