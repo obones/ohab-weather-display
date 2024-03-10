@@ -22,6 +22,7 @@
 #include "fonts/opensans8.h"
 #include "fonts/opensans8b.h"
 #include "fonts/opensans12b.h"
+#include "fonts/opensans18.h"
 #include "fonts/opensans24b.h"
 #include "fonts/opensans26b.h"
 #include "drawPrimitives.h"
@@ -106,9 +107,7 @@ boolean UpdateLocalTime()
         Serial.println("Failed to obtain time");
         return false;
     }
-    CurrentHour = timeInfo.tm_hour;
-    CurrentMin  = timeInfo.tm_min;
-    CurrentSec  = timeInfo.tm_sec;
+
     //See http://www.cplusplus.com/reference/ctime/strftime/
 
     sprintf(day_output, "%s, %02u %s %04u", weekday_D[timeInfo.tm_wday], timeInfo.tm_mday, month_M[timeInfo.tm_mon], (timeInfo.tm_year) + 1900);
@@ -117,6 +116,9 @@ boolean UpdateLocalTime()
 
     Date_str = day_output;
     Time_str = time_output;
+
+    TimeManagement::StoreTime();
+
     return true;
 }
 
@@ -167,12 +169,12 @@ void StopWiFi()
 
 enum getStateResult {Success, WifiIssue, TimeIssue, ServerIssue};
 
-getStateResult getLatestStateFromOpenHAB()
+getStateResult getLatestStateFromOpenHAB(bool SynchronizeWithNTP)
 {
     if (StartWiFi() != WL_CONNECTED)
         return WifiIssue;
 
-    if (!SetupTime())
+    if (SynchronizeWithNTP && !SetupTime())
         return TimeIssue;
 
     WiFiClient wifiClient;   // wifi client object
@@ -205,9 +207,9 @@ getStateResult getLatestStateFromOpenHAB()
     return Success;
 }
 
-void DoFullUpdate()
+void DoFullUpdate(bool SynchronizeWithNTP)
 {
-    getStateResult stateResult = getLatestStateFromOpenHAB();
+    getStateResult stateResult = getLatestStateFromOpenHAB(SynchronizeWithNTP);
     StopWiFi();
 
     epd_poweron();      // Switch on EPD display
@@ -219,6 +221,8 @@ void DoFullUpdate()
         case Success:
             DrawPartialUpdateElements();
             DisplayWindSection(137, 150, 240, 20, 100);
+            setFont(OpenSans18);
+            drawString(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, Time_str, LEFT);
             break;
         case WifiIssue:
             issueText = "Failed to connect to WiFi!";

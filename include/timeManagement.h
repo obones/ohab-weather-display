@@ -12,7 +12,11 @@
  */
 #pragma once
 
-extern int CurrentHour;
-extern int CurrentMin;
-extern int CurrentSec;
+namespace TimeManagement
+{
+    bool Setup();
+    void StoreTime();
+    void RetrieveTime();
+    const char* GetFormattedTime();
+}
 

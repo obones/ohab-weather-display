@@ -77,13 +77,7 @@ void refreshBattery()
 
 void refreshTime()
 {
-    struct tm timeInfo;
-    timeInfo.tm_hour = CurrentHour;
-    timeInfo.tm_min = CurrentMin;
-    timeInfo.tm_sec = CurrentSec;
-
-    char updateTime[30];
-    strftime(updateTime, sizeof(updateTime), "%H:%M", &timeInfo);
+    const char* updateTime = TimeManagement::GetFormattedTime();
 
     setFont(OpenSansLight48);
     drawString(partialUpdateArea.x + partialUpdateArea.width - PARTIAL_AREA_MARGIN, partialUpdateArea.y, updateTime, RIGHT);
