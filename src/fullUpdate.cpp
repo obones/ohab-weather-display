@@ -15,6 +15,7 @@
 #include <WiFi.h>
 #include <time.h>
 #include <HTTPClient.h>
+#include <PCF8563.h>
 
 #include "lang.h"
 
@@ -174,8 +175,15 @@ getStateResult getLatestStateFromOpenHAB(bool SynchronizeWithNTP)
     if (StartWiFi() != WL_CONNECTED)
         return WifiIssue;
 
-    if (SynchronizeWithNTP && !SetupTime())
-        return TimeIssue;
+    if (SynchronizeWithNTP)
+    {  
+        if (!SetupTime())
+            return TimeIssue;
+    }
+    else
+    {
+        Time_str = TimeManagement::GetFormattedTime(PCF_TIMEFORMAT_HH_MM_SS);
+    }
 
     WiFiClient wifiClient;   // wifi client object
     wifiClient.stop(); // close connection before sending a new request
