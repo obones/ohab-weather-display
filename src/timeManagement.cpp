@@ -43,6 +43,10 @@ void TimeManagement::RetrieveTime()
 
 const char* TimeManagement::GetFormattedTime()
 {
-    return rtc.formatDateTime(PCF_TIMEFORMAT_HH_MM);
+    return GetFormattedTime(PCF_TIMEFORMAT_HH_MM);
 }
 
+const char* TimeManagement::GetFormattedTime(uint8_t style)
+{
+    return rtc.formatDateTime(style);
+}

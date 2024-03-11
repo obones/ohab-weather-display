@@ -19,5 +19,6 @@ namespace TimeManagement
     void StoreTime();
     void RetrieveTime();
     const char* GetFormattedTime();
+    const char* GetFormattedTime(uint8_t style);
 }
 
