@@ -16,32 +16,31 @@
 #include "freertos/FreeRTOS.h"  // In-built
 #include "freertos/task.h"      // In-built
 #include "esp_adc_cal.h"        // In-built
+#include "soc/rtc_cntl_reg.h"
 
 #include "partialUpdate.h"
 #include "fullUpdate.h"
 #include "screenDimensions.h"
 #include "drawPrimitives.h"
 #include "timeManagement.h"
-
-const long SleepDuration   = 1; //60; // Sleep time in minutes, aligned to the nearest minute boundary, so if 30 will always update at 00 or 30 past the hour
-const int  WakeupHour      = 8;  // Don't wakeup until after 07:00 to save battery power
-const int  SleepHour       = 23; // Sleep after 23:00 to save battery power
-const long Delta           = 30; // ESP32 rtc speed compensation, prevents display at xx:59:yy and then xx:00:yy (one minute later) to save power
+#include "fontManagement.h"
+#include "fonts/opensans26b.h"
 
 long StartTime       = 0;
 
-RTC_DATA_ATTR int EventCnt = 0;
-
 void BeginSleep() 
 {
-    epd_poweroff_all();
-    //UpdateLocalTime();
-    long SleepTimer = 5; //(SleepDuration * 60 - ((CurrentMin % SleepDuration) * 60 + CurrentSec)) + Delta; //Some ESP32 have a RTC that is too fast to maintain accurate time, so add an offset
-    esp_sleep_enable_timer_wakeup(SleepTimer * 1000000LL); // in Secs, 1000000LL converts to Secs as unit = 1uSec
     Serial.println("Awake for : " + String((millis() - StartTime) / 1000.0, 3) + "-secs");
-    Serial.println("Entering " + String(SleepTimer) + " (secs) of sleep time");
     Serial.println("Starting deep-sleep period...");
-    esp_deep_sleep_start();  // Sleep for e.g. 30 minutes
+    esp_err_t resultCode = esp_sleep_enable_ext0_wakeup(GPIO_NUM_9, 0);
+    if (resultCode != ESP_OK)
+    {
+        setFont(OpenSans26B);
+        drawString(10, SCREEN_HEIGHT / 2, String("EXT0 issue: ") + String(resultCode), LEFT);
+    }
+    epd_poweroff_all();
+
+    esp_deep_sleep_start();  // Sleep until we have received a GPIO interrupt
 }
 
 void loop() 
@@ -51,6 +50,9 @@ void loop()
 
 void InitializeSystem() 
 {
+    // disable brownout, it triggers too easily when waking up from "GPIO" deep sleep
+    WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);
+
     StartTime = millis();
     Serial.begin(115200);
     while (!Serial);
@@ -61,51 +63,42 @@ void InitializeSystem()
     FrameBuffer = (uint8_t *)ps_calloc(sizeof(uint8_t), EPD_WIDTH * EPD_HEIGHT / 2);
     if (!FrameBuffer) Serial.println("Full Screen Memory alloc failed!");
     memset(FrameBuffer, 0xFF, EPD_WIDTH * EPD_HEIGHT / 2);
+
+    if (!TimeManagement::Setup())
+    {
+        setFont(OpenSans26B);
+        drawString(10, SCREEN_HEIGHT / 2, "Cannot setup RTC", LEFT);
+    }
 }
 
 void setup() 
 {
     InitializeSystem();
-    
-    /*bool WakeUp = false;                
-    if (WakeupHour > SleepHour)
-        WakeUp = (CurrentHour >= WakeupHour || CurrentHour <= SleepHour); 
-    else                             
-        WakeUp = (CurrentHour >= WakeupHour && CurrentHour <= SleepHour);                              
 
-    if (WakeUp) */
+    esp_reset_reason_t resetReason = esp_reset_reason();
+    if (resetReason == ESP_RST_DEEPSLEEP)
     {
-        if (EventCnt % 5 == 0)
+        TimeManagement::RetrieveTime();
+
+        time_t now;
+        struct tm  info;
+        time(&now);
+        localtime_r(&now, &info);
+
+        if (info.tm_min % 5 == 0)
         {
-            DoFullUpdate();
+            DoFullUpdate((info.tm_hour == 4) && (info.tm_min < 2));
         }
         else
         {
-            CurrentSec += SleepDuration;
-            if (CurrentSec > 59)
-            {
-                CurrentSec %= 60;
-                CurrentMin += 1;
-
-                if (CurrentMin > 59)
-                {
-                    CurrentMin %= 60;
-                    CurrentHour += 1;
-
-                    if (CurrentHour > 23)
-                    {
-                        CurrentHour = 0;
-                        CurrentMin = 0;
-                        CurrentSec = 0;
-                    }
-                }
-            }
-
             DoPartialUpdate();
         }
     }
-
-    EventCnt++;
+    else
+    {
+        TimeManagement::StartTimer();
+        DoFullUpdate(true);
+    }
     
     BeginSleep();
 }
