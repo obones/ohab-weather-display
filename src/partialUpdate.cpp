@@ -73,6 +73,9 @@ void refreshBattery()
 
     setFont(OpenSans16);
     drawString(partialUpdateArea.x + partialUpdateArea.width - PARTIAL_AREA_MARGIN, partialUpdateArea.y + partialUpdateArea.height - 40, String(battery_voltage), RIGHT);
+
+    esp_reset_reason_t resetReason = esp_reset_reason();
+    drawString(partialUpdateArea.x, partialUpdateArea.y + partialUpdateArea.height - 40, String(resetReason), LEFT);
 }
 
 void refreshTime()
