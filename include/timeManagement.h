@@ -15,6 +15,7 @@
 namespace TimeManagement
 {
     bool Setup();
+    void StartTimer();
     void StoreTime();
     void RetrieveTime();
     const char* GetFormattedTime();

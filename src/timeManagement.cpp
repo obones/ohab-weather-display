@@ -15,12 +15,20 @@
 #include "timeManagement.h"
 #include "pins.h"
 
+#define PCF8563_TIMER_1_60_HZ (0b11)
+
 PCF8563_Class rtc;
 
 bool TimeManagement::Setup()
 {
     Wire.begin(SDA_PIN, SCL_PIN);
     return rtc.begin() != 0;
+}
+
+void TimeManagement::StartTimer()
+{
+    rtc.setTimer(1, PCF8563_TIMER_1_60_HZ, true);
+    rtc.enableTimer();
 }
 
 void TimeManagement::StoreTime()
