@@ -14,6 +14,7 @@
 #include <PCF8563.h>
 #include "timeManagement.h"
 #include "pins.h"
+#include "constants.h"
 
 #define PCF8563_TIMER_1_60_HZ (0b11)
 
@@ -29,6 +30,39 @@ void TimeManagement::StartTimer()
 {
     rtc.setTimer(1, PCF8563_TIMER_1_60_HZ, true);
     rtc.enableTimer();
+}
+
+bool TimeManagement::SynchronizeWithNTP()
+{
+    // reset the current time to force complete time read
+    struct tm timeInfo;
+    struct timeval val;
+
+    timeInfo.tm_hour = 0;
+    timeInfo.tm_min = 0;
+    timeInfo.tm_sec = 0;
+    timeInfo.tm_year = 1970;
+    timeInfo.tm_mon = 0;
+    timeInfo.tm_mday = 1;
+    val.tv_sec = mktime(&timeInfo);
+    val.tv_usec = 0;
+    settimeofday(&val, NULL);
+
+    // start sync with NTP
+    configTime(gmtOffset_sec, daylightOffset_sec, ntpServer, "time.nist.gov"); //(gmtOffset_sec, daylightOffset_sec, ntpServer)
+
+    setenv("TZ", Timezone, 1);  //setenv()adds the "TZ" variable to the environment with a value TimeZone, only used if set to 1, 0 means no change
+    tzset(); // Set the TZ environment variable
+
+    while (!getLocalTime(&timeInfo, 5000)) // Wait for 5-sec for time to synchronize
+    {
+        Serial.println("Failed to obtain time");
+        return false;
+    }
+
+    StoreTime();
+
+    return true;
 }
 
 void TimeManagement::StoreTime()
