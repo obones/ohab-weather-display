@@ -133,7 +133,7 @@ void setup()
 
             if (info.tm_min % 5 == 0)
             {
-                DoFullUpdate(info.tm_min % 15 == 0); //(info.tm_hour == 4) && (info.tm_min < 2));
+                DoFullUpdate((info.tm_hour == 4) && (info.tm_min < 2));
             }
             else
             {
