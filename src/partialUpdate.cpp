@@ -19,6 +19,7 @@
 #include "drawPrimitives.h"
 #include "fontManagement.h"
 #include "pins.h"
+#include "fonts/opensans8.h"
 #include "fonts/opensans16.h"
 #include "fonts/opensanslight48.h"
 
@@ -54,11 +55,30 @@ void refreshBattery()
 {
     float batteryVoltage = BatteryManagement::GetBatteryVoltage();
 
-    setFont(OpenSans16);
-    drawString(partialUpdateArea.x + partialUpdateArea.width - PARTIAL_AREA_MARGIN, partialUpdateArea.y + partialUpdateArea.height - 40, String(batteryVoltage), RIGHT);
-
     esp_reset_reason_t resetReason = esp_reset_reason();
+    setFont(OpenSans16);
     drawString(partialUpdateArea.x, partialUpdateArea.y + partialUpdateArea.height - 40, String(resetReason), LEFT);
+
+    if (batteryVoltage > 1 )  // Only display if there is a valid reading
+    { 
+        Serial.println("\nVoltage = " + String(batteryVoltage));
+        float percentage = BatteryManagement::GetBatteryPercentage(batteryVoltage);
+
+        const int symbolWidth = 40;
+        const int symbolHeight = 20;
+        const int tipWidth = 4;
+        const int tipHeight = 7;
+        const int x = partialUpdateArea.x + partialUpdateArea.width - PARTIAL_AREA_MARGIN - (symbolWidth + tipWidth);
+        const int y = partialUpdateArea.y + 90;//partialUpdateArea.height - symbolHeight - 1;
+
+        drawRect(x, y, symbolWidth, symbolHeight, Black);
+        fillRect(x + symbolWidth, y + (symbolHeight - tipHeight) / 2, tipWidth, tipHeight, Black);
+        fillRect(x + 2, y + 3, (symbolWidth - 4) * percentage / 100.0, symbolHeight - 6, Black);
+
+        setFont(OpenSans8);
+        drawString(x - 10, y + symbolHeight / 2 - 6, String(percentage, 0) + "%  " + String(batteryVoltage, 2) + "v", RIGHT);
+    }
+
 }
 
 void refreshTime()
