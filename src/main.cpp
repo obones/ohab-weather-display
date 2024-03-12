@@ -18,6 +18,8 @@
 #include "esp_adc_cal.h"        // In-built
 #include "soc/rtc_cntl_reg.h"
 
+#include <PCF8563.h>
+
 #include "partialUpdate.h"
 #include "fullUpdate.h"
 #include "screenDimensions.h"
@@ -26,6 +28,7 @@
 #include "batteryManagement.h"
 #include "lang.h"
 #include "fontManagement.h"
+#include "fonts/opensans18.h"
 #include "fonts/opensans26b.h"
 
 long StartTime       = 0;
@@ -110,6 +113,9 @@ void setup()
 
         setFont(OpenSans26B);
         drawString(SCREEN_WIDTH / 2, 50, Lang::Status::LowBattery, CENTER);
+
+        setFont(OpenSans18);
+        drawString(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, TimeManagement::GetFormattedTime(PCF_TIMEFORMAT_YYYY_MM_DD_HH_MM_SS), LEFT);
 
         epd_draw_grayscale_image(epd_full_screen(), FrameBuffer); // Update the screen
     }
