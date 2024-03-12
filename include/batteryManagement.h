@@ -15,4 +15,10 @@
 namespace BatteryManagement
 {
     float GetBatteryVoltage();
+
+    float GetBatteryPercentage();
+    float GetBatteryPercentage(float batteryVoltage);
+
+    bool IsLowBattery();
+    bool IsLowBattery(float batteryVoltage);
 }

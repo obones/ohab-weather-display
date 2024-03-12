@@ -19,6 +19,7 @@
 namespace BatteryManagement
 {
     float latestBatteryVoltage = 0;
+    const float minimumBatteryVoltage = 2.99;
 
     float GetBatteryVoltage()
     {
@@ -45,5 +46,29 @@ namespace BatteryManagement
         }
 
         return latestBatteryVoltage;
+    }
+
+    float GetBatteryPercentage()
+    {
+        return GetBatteryPercentage(GetBatteryVoltage());
+    }
+
+    float GetBatteryPercentage(float batteryVoltage)
+    {
+        float result = 2836.9625 * pow(batteryVoltage, 4) - 43987.4889 * pow(batteryVoltage, 3) + 255233.8134 * pow(batteryVoltage, 2) - 656689.7123 * batteryVoltage + 632041.7303;
+        if (batteryVoltage >= 4.40) return 100;
+        if (IsLowBattery(batteryVoltage)) return 0;
+        
+        return result;
+    }
+
+    bool IsLowBattery()
+    {
+        return IsLowBattery(GetBatteryVoltage());
+    }
+
+    bool IsLowBattery(float batteryVoltage)
+    {
+        return batteryVoltage < minimumBatteryVoltage;
     }
 }
