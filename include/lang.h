@@ -10,8 +10,44 @@
  *
  * SPDX-License-Identifier: MPL-2.0
  */
+#define USE_LANG_EN
+
 #ifdef USE_LANG_FR
-#include "lang_fr.h"
-#else
-#include "lang_en.h"
+#undef USE_LANG_EN
 #endif
+
+#include <WString.h>
+
+namespace Lang
+{
+    //Wind
+    extern const String TXT_WIND_SPEED_DIRECTION;
+    extern const String TXT_N;
+    extern const String TXT_NNE;
+    extern const String TXT_NE;
+    extern const String TXT_ENE;
+    extern const String TXT_E;
+    extern const String TXT_ESE;
+    extern const String TXT_SE;
+    extern const String TXT_SSE;
+    extern const String TXT_S;
+    extern const String TXT_SSW;
+    extern const String TXT_SW;
+    extern const String TXT_WSW;
+    extern const String TXT_W;
+    extern const String TXT_WNW;
+    extern const String TXT_NW;
+    extern const String TXT_NNW;
+
+    //Day of the week
+    extern const char* weekday_D[];
+
+    //Month
+    extern const char* month_M[];
+
+    // system status
+    namespace Status
+    {
+        extern const char* LowBattery;
+    }
+}

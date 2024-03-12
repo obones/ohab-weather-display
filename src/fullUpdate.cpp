@@ -43,22 +43,22 @@ void edp_update()
 
 String WindDegToOrdinalDirection(float windDirection) 
 {
-    if (windDirection >= 348.75 || windDirection < 11.25)  return TXT_N;
-    if (windDirection >=  11.25 && windDirection < 33.75)  return TXT_NNE;
-    if (windDirection >=  33.75 && windDirection < 56.25)  return TXT_NE;
-    if (windDirection >=  56.25 && windDirection < 78.75)  return TXT_ENE;
-    if (windDirection >=  78.75 && windDirection < 101.25) return TXT_E;
-    if (windDirection >= 101.25 && windDirection < 123.75) return TXT_ESE;
-    if (windDirection >= 123.75 && windDirection < 146.25) return TXT_SE;
-    if (windDirection >= 146.25 && windDirection < 168.75) return TXT_SSE;
-    if (windDirection >= 168.75 && windDirection < 191.25) return TXT_S;
-    if (windDirection >= 191.25 && windDirection < 213.75) return TXT_SSW;
-    if (windDirection >= 213.75 && windDirection < 236.25) return TXT_SW;
-    if (windDirection >= 236.25 && windDirection < 258.75) return TXT_WSW;
-    if (windDirection >= 258.75 && windDirection < 281.25) return TXT_W;
-    if (windDirection >= 281.25 && windDirection < 303.75) return TXT_WNW;
-    if (windDirection >= 303.75 && windDirection < 326.25) return TXT_NW;
-    if (windDirection >= 326.25 && windDirection < 348.75) return TXT_NNW;
+    if (windDirection >= 348.75 || windDirection < 11.25)  return Lang::TXT_N;
+    if (windDirection >=  11.25 && windDirection < 33.75)  return Lang::TXT_NNE;
+    if (windDirection >=  33.75 && windDirection < 56.25)  return Lang::TXT_NE;
+    if (windDirection >=  56.25 && windDirection < 78.75)  return Lang::TXT_ENE;
+    if (windDirection >=  78.75 && windDirection < 101.25) return Lang::TXT_E;
+    if (windDirection >= 101.25 && windDirection < 123.75) return Lang::TXT_ESE;
+    if (windDirection >= 123.75 && windDirection < 146.25) return Lang::TXT_SE;
+    if (windDirection >= 146.25 && windDirection < 168.75) return Lang::TXT_SSE;
+    if (windDirection >= 168.75 && windDirection < 191.25) return Lang::TXT_S;
+    if (windDirection >= 191.25 && windDirection < 213.75) return Lang::TXT_SSW;
+    if (windDirection >= 213.75 && windDirection < 236.25) return Lang::TXT_SW;
+    if (windDirection >= 236.25 && windDirection < 258.75) return Lang::TXT_WSW;
+    if (windDirection >= 258.75 && windDirection < 281.25) return Lang::TXT_W;
+    if (windDirection >= 281.25 && windDirection < 303.75) return Lang::TXT_WNW;
+    if (windDirection >= 303.75 && windDirection < 326.25) return Lang::TXT_NW;
+    if (windDirection >= 326.25 && windDirection < 348.75) return Lang::TXT_NNW;
     return "?";
 }
 
@@ -73,10 +73,10 @@ void DisplayWindSection(int x, int y, float angle, float windSpeed, int compassR
     for (float a = 0; a < 360; a = a + 22.5) {
         dxo = compassRadius * cos((a - 90) * PI / 180);
         dyo = compassRadius * sin((a - 90) * PI / 180);
-        if (a == 45)  drawString(dxo + x + 15, dyo + y - 18, TXT_NE, CENTER);
-        if (a == 135) drawString(dxo + x + 20, dyo + y - 2,  TXT_SE, CENTER);
-        if (a == 225) drawString(dxo + x - 20, dyo + y - 2,  TXT_SW, CENTER);
-        if (a == 315) drawString(dxo + x - 15, dyo + y - 18, TXT_NW, CENTER);
+        if (a == 45)  drawString(dxo + x + 15, dyo + y - 18, Lang::TXT_NE, CENTER);
+        if (a == 135) drawString(dxo + x + 20, dyo + y - 2,  Lang::TXT_SE, CENTER);
+        if (a == 225) drawString(dxo + x - 20, dyo + y - 2,  Lang::TXT_SW, CENTER);
+        if (a == 315) drawString(dxo + x - 15, dyo + y - 18, Lang::TXT_NW, CENTER);
         dxi = dxo * 0.9;
         dyi = dyo * 0.9;
         drawLine(dxo + x, dyo + y, dxi + x, dyi + y, Black);
@@ -86,10 +86,10 @@ void DisplayWindSection(int x, int y, float angle, float windSpeed, int compassR
         dyi = dyo * 0.9;
         drawLine(dxo + x, dyo + y, dxi + x, dyi + y, Black);
     }
-    drawString(x, y - compassRadius - 20,     TXT_N, CENTER);
-    drawString(x, y + compassRadius + 10,     TXT_S, CENTER);
-    drawString(x - compassRadius - 15, y - 5, TXT_W, CENTER);
-    drawString(x + compassRadius + 10, y - 5, TXT_E, CENTER);
+    drawString(x, y - compassRadius - 20,     Lang::TXT_N, CENTER);
+    drawString(x, y + compassRadius + 10,     Lang::TXT_S, CENTER);
+    drawString(x - compassRadius - 15, y - 5, Lang::TXT_W, CENTER);
+    drawString(x + compassRadius + 10, y - 5, Lang::TXT_E, CENTER);
     drawString(x + 3, y + 50, String(angle, 0) + "°", CENTER);
     setFont(OpenSans12B);
     drawString(x, y - 50, WindDegToOrdinalDirection(angle), CENTER);
