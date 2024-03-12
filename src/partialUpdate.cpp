@@ -11,11 +11,11 @@
  * SPDX-License-Identifier: MPL-2.0
  */
 #include <time.h>
-#include <esp_adc_cal.h>
 #include <HardwareSerial.h>
 #include "partialUpdate.h"
 #include "screenDimensions.h"
 #include "timeManagement.h"
+#include "batteryManagement.h"
 #include "drawPrimitives.h"
 #include "fontManagement.h"
 #include "pins.h"
@@ -52,27 +52,10 @@ void edp_partial_update()
 
 void refreshBattery()
 {
-    esp_adc_cal_characteristics_t adc_chars;
-    esp_adc_cal_value_t val_type = esp_adc_cal_characterize(
-        ADC_UNIT_2,
-        ADC_ATTEN_DB_11,
-        ADC_WIDTH_BIT_12,
-        1100,
-        &adc_chars
-    );
-
-    int vref = 1100;
-    if (val_type == ESP_ADC_CAL_VAL_EFUSE_VREF) 
-    {
-        Serial.printf("eFuse Vref: %umV\r\n", adc_chars.vref);
-        vref = adc_chars.vref;
-    }
-
-    uint16_t v = analogRead(BATT_PIN);
-    float battery_voltage = ((float)v / 4095.0) * 2.0 * 3.3 * (vref / 1000.0);
+    float batteryVoltage = BatteryManagement::GetBatteryVoltage();
 
     setFont(OpenSans16);
-    drawString(partialUpdateArea.x + partialUpdateArea.width - PARTIAL_AREA_MARGIN, partialUpdateArea.y + partialUpdateArea.height - 40, String(battery_voltage), RIGHT);
+    drawString(partialUpdateArea.x + partialUpdateArea.width - PARTIAL_AREA_MARGIN, partialUpdateArea.y + partialUpdateArea.height - 40, String(batteryVoltage), RIGHT);
 
     esp_reset_reason_t resetReason = esp_reset_reason();
     drawString(partialUpdateArea.x, partialUpdateArea.y + partialUpdateArea.height - 40, String(resetReason), LEFT);
