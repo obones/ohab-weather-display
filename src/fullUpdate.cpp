@@ -99,39 +99,6 @@ void DisplayWindSection(int x, int y, float angle, float windSpeed, int compassR
     drawString(x, y + 25, "km/h", CENTER);
 }
 
-boolean UpdateLocalTime() 
-{
-    struct tm timeInfo;
-    char   time_output[30], day_output[30], update_time[30];
-    while (!getLocalTime(&timeInfo, 5000)) // Wait for 5-sec for time to synchronize
-    {
-        Serial.println("Failed to obtain time");
-        return false;
-    }
-
-    //See http://www.cplusplus.com/reference/ctime/strftime/
-
-    sprintf(day_output, "%s, %02u %s %04u", weekday_D[timeInfo.tm_wday], timeInfo.tm_mday, month_M[timeInfo.tm_mon], (timeInfo.tm_year) + 1900);
-    strftime(update_time, sizeof(update_time), "%H:%M:%S", &timeInfo);  // Creates: '@ 14:05:49'   and change from 30 to 8 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-    sprintf(time_output, "%s", update_time);
-
-    Date_str = day_output;
-    Time_str = time_output;
-
-    TimeManagement::StoreTime();
-
-    return true;
-}
-
-boolean SetupTime() 
-{
-    configTime(gmtOffset_sec, daylightOffset_sec, ntpServer, "time.nist.gov"); //(gmtOffset_sec, daylightOffset_sec, ntpServer)
-    setenv("TZ", Timezone, 1);  //setenv()adds the "TZ" variable to the environment with a value TimeZone, only used if set to 1, 0 means no change
-    tzset(); // Set the TZ environment variable
-    delay(100);
-    return UpdateLocalTime();
-}
-
 uint8_t StartWiFi() 
 {
     Serial.println("\r\nConnecting to: " + String(ssid));
@@ -175,15 +142,10 @@ getStateResult getLatestStateFromOpenHAB(bool SynchronizeWithNTP)
     if (StartWiFi() != WL_CONNECTED)
         return WifiIssue;
 
-    if (SynchronizeWithNTP)
-    {  
-        if (!SetupTime())
-            return TimeIssue;
-    }
-    else
-    {
-        Time_str = TimeManagement::GetFormattedTime(PCF_TIMEFORMAT_HH_MM_SS);
-    }
+    if (SynchronizeWithNTP && !TimeManagement::SynchronizeWithNTP())
+        return TimeIssue;
+
+    Time_str = TimeManagement::GetFormattedTime(PCF_TIMEFORMAT_HH_MM_SS);
 
     WiFiClient wifiClient;   // wifi client object
     wifiClient.stop(); // close connection before sending a new request
