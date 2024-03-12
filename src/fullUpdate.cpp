@@ -94,7 +94,7 @@ void DisplayWindSection(int x, int y, float angle, float windSpeed, int compassR
     setFont(OpenSans12B);
     drawString(x, y - 50, WindDegToOrdinalDirection(angle), CENTER);
     setFont(OpenSans24B);
-    drawString(x + 3, y - 18, String(windSpeed, 1), CENTER);
+    drawString(x + 3, y - 18, String(windSpeed, 0), CENTER);
     setFont(OpenSans12B);
     drawString(x, y + 25, "km/h", CENTER);
 }
