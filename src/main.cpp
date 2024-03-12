@@ -81,7 +81,7 @@ void setup()
 {
     InitializeSystem();
 
-    bool lowBattery = BatteryManagement::GetBatteryVoltage() < 2.99;
+    bool lowBattery = BatteryManagement::IsLowBattery();
     if (lowBattery)
     {
         epd_clear();
