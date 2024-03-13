@@ -1,0 +1,15 @@
+{
+  "compilerOptions": 
+  {
+    "paths": {
+      "*": [
+        "./node_modules/*"
+      ]
+    },
+    "module": "es6",
+    "moduleResolution": "node",
+    "outDir": "./build",
+    "target": "es6"
+  }
+}
+

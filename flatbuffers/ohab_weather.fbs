@@ -1,0 +1,15 @@
+namespace ohab_weather;
+
+table Weather
+{
+    current: CurrentWeather;
+}
+
+table CurrentWeather
+{
+    outdoorTemperature: float;
+    windDirection: float;
+    windSpeed: float;
+}
+
+root_type Weather;
