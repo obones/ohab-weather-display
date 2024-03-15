@@ -55,9 +55,16 @@ namespace BatteryManagement
 
     float GetBatteryPercentage(float batteryVoltage)
     {
-        float result = 2836.9625 * pow(batteryVoltage, 4) - 43987.4889 * pow(batteryVoltage, 3) + 255233.8134 * pow(batteryVoltage, 2) - 656689.7123 * batteryVoltage + 632041.7303;
-        if (batteryVoltage >= 4.40) return 100;
-        if (IsLowBattery(batteryVoltage)) return 0;
+        // 4PL symmetrical sigmoidal formula found with https://mycurvefit.com/ and those data points:
+        //   4.42              100.5       
+        //   4                  91.1       
+        //   3.9                80
+        //   3.75               50.09      
+        //   2.99                0         
+        //
+        float result = 100.8605 + (-0.03662109 - 100.8605) / (1 + pow(batteryVoltage / 3.751438, 34.70826));
+        if (result > 100) return 100;
+        if ((result < 0) || IsLowBattery(batteryVoltage)) return 0;
         
         return result;
     }
