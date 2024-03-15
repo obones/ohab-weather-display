@@ -27,6 +27,7 @@
 #include "fonts/opensans18.h"
 #include "fonts/opensans24b.h"
 #include "fonts/opensans26b.h"
+#include "fonts/opensans32.h"
 #include "drawPrimitives.h"
 #include "fontManagement.h"
 #include "timeManagement.h"
@@ -97,7 +98,7 @@ void DisplayWindSection(int x, int y, float angle, float windSpeed, int compassR
     setFont(OpenSans12B);
     drawString(x, y - 50, WindDegToOrdinalDirection(angle), CENTER);
     setFont(OpenSans24B);
-    drawString(x + 3, y - 18, String(windSpeed, 0), CENTER);
+    drawString(x, y - 18, String(windSpeed, 0), CENTER);
     setFont(OpenSans12B);
     drawString(x, y + 25, "km/h", CENTER);
 }
@@ -196,6 +197,10 @@ void DrawFullUpdateElements()
     const ohab_weather::CurrentWeather* current = weather->current();
 
     DisplayWindSection(137, 150, current->windDirection(), current->windSpeed(), 100);
+
+    setFont(OpenSans32);
+    drawString(SCREEN_WIDTH - PARTIAL_AREA_MARGIN, PARTIAL_AREA_Y + PARTIAL_AREA_HEIGHT, String(current->outdoorTemperature(), 1) + "°", RIGHT);
+
     setFont(OpenSans18);
     drawString(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, Time_str, LEFT);
 }
