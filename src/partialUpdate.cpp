@@ -23,14 +23,10 @@
 #include "fonts/opensans16.h"
 #include "fonts/opensanslight48.h"
 
-#define PARTIAL_AREA_WIDTH 300
-#define PARTIAL_AREA_HEIGHT 150
-#define PARTIAL_AREA_MARGIN 10
-
 Rect_t partialUpdateArea = 
     {
-        .x = SCREEN_WIDTH - PARTIAL_AREA_WIDTH,
-        .y = PARTIAL_AREA_MARGIN,
+        .x = PARTIAL_AREA_X,
+        .y = PARTIAL_AREA_Y,
         .width = PARTIAL_AREA_WIDTH,
         .height = PARTIAL_AREA_HEIGHT
     };
