@@ -16,6 +16,7 @@
 #include <time.h>
 #include <HTTPClient.h>
 #include <PCF8563.h>
+#include <mbedtls/base64.h>
 
 #include "lang.h"
 
@@ -31,9 +32,11 @@
 #include "timeManagement.h"
 #include "constants.h"
 #include "partialUpdate.h"
+#include "ohab_weather_generated.h"
 
 String Time_str = "--:--:--";
 String Date_str = "-- --- ----";
+uint8_t* currentState = nullptr;
 int wifi_signal;
 
 void edp_update() 
@@ -150,12 +153,20 @@ getStateResult getLatestStateFromOpenHAB(bool SynchronizeWithNTP)
     WiFiClient wifiClient;   // wifi client object
     wifiClient.stop(); // close connection before sending a new request
     HTTPClient http;
-    String uri = String("/rest/items/") + OpenHABItemName; //http://server:8080/rest/items/ope
+    String uri = String("/rest/items/") + OpenHABItemName + "/state"; //http://server:8080/rest/items/ope
 
     http.begin(wifiClient, OpenHABServerName, OpenHABServerPort, uri); //http.begin(uri,test_root_ca); //HTTPS example connection
     int httpCode = http.GET();
     if (httpCode == HTTP_CODE_OK) 
     {
+        String base64State = http.getString();
+
+        free(currentState);
+        size_t bufferLength = base64State.length() * 2;
+        size_t finalLength;
+        currentState = reinterpret_cast<uint8_t*>(malloc(bufferLength));
+        mbedtls_base64_decode(currentState, bufferLength, &finalLength, reinterpret_cast<const unsigned char *>(base64State.c_str()), base64State.length());
+
         wifiClient.stop();
         http.end();
         return Success;
@@ -177,6 +188,18 @@ getStateResult getLatestStateFromOpenHAB(bool SynchronizeWithNTP)
     return Success;
 }
 
+void DrawFullUpdateElements()
+{
+    DrawPartialUpdateElements();
+
+    const ohab_weather::Weather* weather = ohab_weather::GetWeather(currentState);
+    const ohab_weather::CurrentWeather* current = weather->current();
+
+    DisplayWindSection(137, 150, current->windDirection(), current->windSpeed(), 100);
+    setFont(OpenSans18);
+    drawString(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, Time_str, LEFT);
+}
+
 void DoFullUpdate(bool SynchronizeWithNTP)
 {
     getStateResult stateResult = getLatestStateFromOpenHAB(SynchronizeWithNTP);
@@ -189,10 +212,7 @@ void DoFullUpdate(bool SynchronizeWithNTP)
     switch (stateResult)
     {
         case Success:
-            DrawPartialUpdateElements();
-            DisplayWindSection(137, 150, 240, 20, 100);
-            setFont(OpenSans18);
-            drawString(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, Time_str, LEFT);
+            DrawFullUpdateElements();
             break;
         case WifiIssue:
             issueText = "Failed to connect to WiFi!";

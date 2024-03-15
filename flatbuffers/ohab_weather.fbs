@@ -3,6 +3,7 @@ namespace ohab_weather;
 table Weather
 {
     current: CurrentWeather;
+    days: [Forecast];
 }
 
 table CurrentWeather
@@ -10,6 +11,20 @@ table CurrentWeather
     outdoorTemperature: float;
     windDirection: float;
     windSpeed: float;
+    pressure: float;
+}
+
+table Forecast
+{
+    minTemperature: float;
+    maxTemperature: float;
+    maxWindSpeed: float;
+    dominantWindDirection: float;
+    conditionCode: ubyte;
+    cloudiness: float;
+    snow: float;
+    rain: float;
+    showers: float;
 }
 
 root_type Weather;
