@@ -25,6 +25,7 @@
 #include "fonts/opensans8b.h"
 #include "fonts/opensans12b.h"
 #include "fonts/opensans18.h"
+#include "fonts/opensans16.h"
 #include "fonts/opensans24b.h"
 #include "fonts/opensans26b.h"
 #include "fonts/opensans32.h"
@@ -196,13 +197,19 @@ void DrawFullUpdateElements()
     const ohab_weather::Weather* weather = ohab_weather::GetWeather(currentState);
     const ohab_weather::CurrentWeather* current = weather->current();
 
+    // current wind information
     DisplayWindSection(137, 150, current->windDirection(), current->windSpeed(), 100);
 
+    // current outdoor temperature
     setFont(OpenSans32);
     drawString(SCREEN_WIDTH - PARTIAL_AREA_MARGIN, PARTIAL_AREA_Y + PARTIAL_AREA_HEIGHT, String(current->outdoorTemperature(), 1) + "°", RIGHT);
 
     setFont(OpenSans18);
     drawString(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, Time_str, LEFT);
+
+    // current full string date
+    setFont(OpenSans16);
+    drawString(SCREEN_WIDTH / 2, 20, TimeManagement::GetFormattedDate(), CENTER);
 }
 
 void DoFullUpdate(bool SynchronizeWithNTP)
