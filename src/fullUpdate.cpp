@@ -21,14 +21,20 @@
 #include "lang.h"
 
 #include "screenDimensions.h"
+#include "fonts/opensans6.h"
 #include "fonts/opensans8.h"
 #include "fonts/opensans8b.h"
+#include "fonts/opensans10.h"
+#include "fonts/opensans12.h"
 #include "fonts/opensans12b.h"
+#include "fonts/opensans14.h"
 #include "fonts/opensans18.h"
 #include "fonts/opensans16.h"
 #include "fonts/opensans24b.h"
 #include "fonts/opensans26b.h"
 #include "fonts/opensans32.h"
+#include "fonts/weathericons48.h"
+#include "fonts/weathericons64.h"
 #include "drawPrimitives.h"
 #include "fontManagement.h"
 #include "timeManagement.h"
@@ -102,6 +108,39 @@ void DisplayWindSection(int x, int y, float angle, float windSpeed, int compassR
     drawString(x, y - 18, String(windSpeed, 0), CENTER);
     setFont(OpenSans12B);
     drawString(x, y + 25, "km/h", CENTER);
+}
+
+void DisplayTodayForecast(int x, int y, float maxTemp, float minTemp, float precipitationSum)
+{
+    const int textShiftX = 120;
+    const int textShiftY = 40;
+    const int textSpacing = 45;
+
+    setFont(WeatherIcons64);
+    drawString(x, y, "\xef\x80\x8d", CENTER);
+
+    setFont(OpenSans16);
+    drawString(x - textShiftX, y + textShiftY, String(maxTemp, 0) + "°", RIGHT);
+    drawString(x - textShiftX, y + textShiftY + textSpacing, String(minTemp, 0) + "°", RIGHT);
+    drawString(x - textShiftX - 12, y + textShiftY + textSpacing * 2, String(precipitationSum, 0), RIGHT);
+    setFont(OpenSans8);
+    drawString(x - textShiftX - 7, y + textShiftY + textSpacing * 2 + 15, "mm", LEFT);
+}
+
+void DisplayNextDaysForecast(int x, int y, int dayOfWeek, float maxTemp, float minTemp)
+{
+    const int textShiftX = 60;
+    const int textShiftY = 150;
+
+    setFont(OpenSans14);
+    drawString(x, y - 20, Lang::weekday_A[dayOfWeek], CENTER);
+
+    setFont(WeatherIcons48);
+    drawString(x, y, "\xef\x80\x8d", CENTER);
+
+    setFont(OpenSans14);
+    drawString(x - textShiftX, y + textShiftY, String(minTemp, 0) + "°", LEFT);
+    drawString(x + textShiftX, y + textShiftY, String(maxTemp, 0) + "°", RIGHT);
 }
 
 uint8_t StartWiFi() 
@@ -204,12 +243,25 @@ void DrawFullUpdateElements()
     setFont(OpenSans32);
     drawString(SCREEN_WIDTH - PARTIAL_AREA_MARGIN, PARTIAL_AREA_Y + PARTIAL_AREA_HEIGHT, String(current->outdoorTemperature(), 1) + "°", RIGHT);
 
-    setFont(OpenSans18);
-    drawString(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, Time_str, LEFT);
-
     // current full string date
     setFont(OpenSans16);
     drawString(SCREEN_WIDTH / 2, 20, TimeManagement::GetFormattedDate(), CENTER);
+
+    // forecast for today
+    DisplayTodayForecast(SCREEN_WIDTH / 2, 50, 15.2, -5.3, 2.9);
+
+    // forecast for next days
+    const int forecastDays = 6;
+    const int daysMargin = 85;
+    const int dayOfWeek = TimeManagement::getDayOfWeek();
+    for (int day = 1; day < forecastDays; day++)
+        DisplayNextDaysForecast(
+            daysMargin + (day - 1) * ((SCREEN_WIDTH - daysMargin * 2) / (forecastDays - 2)), 
+            SCREEN_HEIGHT - 200, 
+            (dayOfWeek + day) % 7, 
+            5*day, 
+            -1*day
+        );
 }
 
 void DoFullUpdate(bool SynchronizeWithNTP)
