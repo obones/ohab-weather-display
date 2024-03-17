@@ -94,9 +94,18 @@ const char* TimeManagement::GetFormattedDate()
     time(&now);
     localtime_r(&now, &info);
 
-    Lang::month_B;
-
     snprintf(fullDate, sizeof(fullDate), Lang::FormattedDateFormat, Lang::weekday_A[info.tm_wday], info.tm_mday, Lang::month_B[info.tm_mon]);
 
     return fullDate;
 }
+
+int TimeManagement::getDayOfWeek() // Sunday is 0
+{
+    time_t now;
+    struct tm  info;
+    time(&now);
+    localtime_r(&now, &info);
+
+    return info.tm_wday;
+}
+

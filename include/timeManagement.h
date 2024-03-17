@@ -22,5 +22,6 @@ namespace TimeManagement
     const char* GetFormattedTime();
     const char* GetFormattedTime(uint8_t style);
     const char* GetFormattedDate();
+    int getDayOfWeek(); // Sunday is 0
 }
 
