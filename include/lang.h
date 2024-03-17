@@ -40,10 +40,15 @@ namespace Lang
     extern const String TXT_NNW;
 
     //Day of the week
-    extern const char* weekday_D[];
+    extern const char* weekday_a[];
+    extern const char* weekday_A[];
 
     //Month
-    extern const char* month_M[];
+    extern const char* month_b[];
+    extern const char* month_B[];
+
+    // with printf replacements, 1 is string for day of week, 2 is day in month as a number, 3 is month name
+    extern const char* FormattedDateFormat;
 
     // system status
     namespace Status

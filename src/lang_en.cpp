@@ -37,10 +37,15 @@ namespace Lang
     const String TXT_NNW = "NNW";
 
     //Day of the week
-    const char* weekday_D[] = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
+    const char* weekday_a[] = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
+    const char* weekday_A[] = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
 
     //Month
-    const char* month_M[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+    const char* month_b[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+    const char* month_B[] = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
+
+    // with printf replacements, 1 is string for day of week, 2 is day in month as a number, 3 is month name
+    const char* FormattedDateFormat = "%1$s, %3$s %2$d";
 
     // system status
     namespace Status
