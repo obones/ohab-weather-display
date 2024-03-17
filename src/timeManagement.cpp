@@ -15,10 +15,12 @@
 #include "timeManagement.h"
 #include "pins.h"
 #include "constants.h"
+#include "lang.h"
 
 #define PCF8563_TIMER_1_60_HZ (0b11)
 
 PCF8563_Class rtc;
+char fullDate[128];
 
 bool TimeManagement::Setup()
 {
@@ -83,4 +85,18 @@ const char* TimeManagement::GetFormattedTime()
 const char* TimeManagement::GetFormattedTime(uint8_t style)
 {
     return rtc.formatDateTime(style);
+}
+
+const char* TimeManagement::GetFormattedDate()
+{
+    time_t now;
+    struct tm  info;
+    time(&now);
+    localtime_r(&now, &info);
+
+    Lang::month_B;
+
+    snprintf(fullDate, sizeof(fullDate), Lang::FormattedDateFormat, Lang::weekday_A[info.tm_wday], info.tm_mday, Lang::month_B[info.tm_mon]);
+
+    return fullDate;
 }
