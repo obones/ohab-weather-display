@@ -262,7 +262,7 @@ void DisplayTodayForecast(int x, int y, int conditionCode, float maxTemp, float 
     drawString(x - textShiftX - 7, y + textShiftY + textSpacing * 2 + 15, "mm", LEFT);
 }
 
-void DisplayNextDaysForecast(int x, int y, int dayOfWeek, int conditionCode, float maxTemp, float minTemp)
+void DisplayNextDayForecast(int x, int y, int dayOfWeek, int conditionCode, float maxTemp, float minTemp)
 {
     const int textShiftX = 60;
     const int textShiftY = 150;
@@ -396,7 +396,7 @@ void DrawFullUpdateElements()
     const int dayOfWeek = TimeManagement::getDayOfWeek();
     const int conditions[] = {80, 81, 82, 85, 86};
     for (int day = 1; day < forecastDays; day++)
-        DisplayNextDaysForecast(
+        DisplayNextDayForecast(
             daysMargin + (day - 1) * ((SCREEN_WIDTH - daysMargin * 2) / (forecastDays - 2)), 
             forecastY, 
             (dayOfWeek + day) % 7, 
