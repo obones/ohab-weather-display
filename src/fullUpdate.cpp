@@ -325,6 +325,44 @@ uint8_t StartWiFi()
     return WiFi.status();
 }
 
+void DrawMoon(int x, int y, double Phase)  // phase is between 0 and 1
+{
+  const int diameter = 65;
+
+  // Draw dark part of moon
+  fillCircle(x + diameter - 1, y + diameter, diameter / 2 + 1, LightGrey);
+  const int number_of_lines = 90;
+  for (double Ypos = 0; Ypos <= number_of_lines / 2; Ypos++) 
+  {
+    double Xpos = sqrt(number_of_lines / 2 * number_of_lines / 2 - Ypos * Ypos);
+    // Determine the edges of the lighted part of the moon
+    double Rpos = 2 * Xpos;
+    double Xpos1, Xpos2;
+    if (Phase < 0.5) 
+    {
+      Xpos1 = -Xpos;
+      Xpos2 = Rpos - 2 * Phase * Rpos - Xpos;
+    }
+    else 
+    {
+      Xpos1 = Xpos;
+      Xpos2 = Xpos - 2 * Phase * Rpos + Rpos;
+    }
+    // Draw light part of moon
+    double pW1x = (Xpos1 + number_of_lines) / number_of_lines * diameter + x;
+    double pW1y = (number_of_lines - Ypos)  / number_of_lines * diameter + y;
+    double pW2x = (Xpos2 + number_of_lines) / number_of_lines * diameter + x;
+    double pW2y = (number_of_lines - Ypos)  / number_of_lines * diameter + y;
+    double pW3x = (Xpos1 + number_of_lines) / number_of_lines * diameter + x;
+    double pW3y = (Ypos + number_of_lines)  / number_of_lines * diameter + y;
+    double pW4x = (Xpos2 + number_of_lines) / number_of_lines * diameter + x;
+    double pW4y = (Ypos + number_of_lines)  / number_of_lines * diameter + y;
+    drawLine(pW1x, pW1y, pW2x, pW2y, White);
+    drawLine(pW3x, pW3y, pW4x, pW4y, White);
+  }
+  drawCircle(x + diameter - 1, y + diameter, diameter / 2, Black);
+}
+
 void StopWiFi() 
 {
     WiFi.disconnect();
@@ -427,6 +465,9 @@ void DrawFullUpdateElements()
 
     for (int day = 1; day < forecastDays - 1; day++)
         drawFastVLine(day * SCREEN_WIDTH / (forecastDays - 1), topRowY, SCREEN_HEIGHT - topRowY, Black);
+
+    // moon phase
+    DrawMoon(SCREEN_WIDTH / 2 + 125, 185, 0.15);
 }
 
 void DoFullUpdate(bool SynchronizeWithNTP)
