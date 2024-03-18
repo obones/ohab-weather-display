@@ -390,6 +390,7 @@ void DrawFullUpdateElements()
     DisplayTodayForecast(SCREEN_WIDTH / 2, 50, todayConditionCode, 15.2, -5.3, 2.9);
 
     // forecast for next days
+    const int forecastY = SCREEN_HEIGHT - 200;
     const int forecastDays = 6;
     const int daysMargin = 85;
     const int dayOfWeek = TimeManagement::getDayOfWeek();
@@ -397,12 +398,20 @@ void DrawFullUpdateElements()
     for (int day = 1; day < forecastDays; day++)
         DisplayNextDaysForecast(
             daysMargin + (day - 1) * ((SCREEN_WIDTH - daysMargin * 2) / (forecastDays - 2)), 
-            SCREEN_HEIGHT - 200, 
+            forecastY, 
             (dayOfWeek + day) % 7, 
             conditions[day-1],//day+(day/4)*(44+2*(day%4)),
             5*day, 
             -1*day
         );
+
+    // separators for next days
+    const int topRowY = forecastY - 35;
+    drawFastHLine(0, topRowY, SCREEN_WIDTH, Black);
+    drawFastHLine(0, forecastY, SCREEN_WIDTH, Black);
+
+    for (int day = 1; day < forecastDays - 1; day++)
+        drawFastVLine(day * SCREEN_WIDTH / (forecastDays - 1), topRowY, SCREEN_HEIGHT - topRowY, Black);
 }
 
 void DoFullUpdate(bool SynchronizeWithNTP)
