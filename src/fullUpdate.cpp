@@ -74,7 +74,7 @@ String WindDegToOrdinalDirection(float windDirection)
     return "?";
 }
 
-void DisplayWindSection(int x, int y, float angle, float windSpeed, int compassRadius) 
+void DisplayWindSection(int x, int y, float angle, float windSpeed, int compassRadius, String windSpeedUnit) 
 {
     arrow(x, y, compassRadius - 22, angle, 18, 33); // Show wind direction on outer circle of width and length
     setFont(OpenSans8B);
@@ -108,7 +108,7 @@ void DisplayWindSection(int x, int y, float angle, float windSpeed, int compassR
     setFont(OpenSans24B);
     drawString(x, y - 18, String(windSpeed, 0), CENTER);
     setFont(OpenSans12B);
-    drawString(x, y + 25, "km/h", CENTER);
+    drawString(x, y + 25, windSpeedUnit, CENTER);
 }
 
 const char* GetWeatherIcon(int conditionCode, bool isDay)
@@ -256,7 +256,10 @@ void DrawWeatherIcon(const GFXfont &glyphFont, const GFXfont &precipitationFont,
     drawString(x + precipitationXOffset, glyphY + precipitationYOffset, details.precipitation, CENTER);
 }
 
-void DisplayTodayForecast(int x, int y, int conditionCode, float maxTemp, float minTemp, float precipitationSum, float windDirection, float maxWindSpeed)
+void DisplayTodayForecast(
+    int x, int y, 
+    int conditionCode, float maxTemp, float minTemp, float precipitationSum, float windDirection, float maxWindSpeed,
+    String precipitationUnit, String windSpeedUnit)
 {
     const int textShiftX = 120;
     const int textShiftY = 25;
@@ -271,12 +274,12 @@ void DisplayTodayForecast(int x, int y, int conditionCode, float maxTemp, float 
     drawString(x - textShiftX, y + textShiftY + textSpacing, String(minTemp, 0) + "°", RIGHT);
     drawString(x - textShiftX - textUnitLessSpacing, y + textShiftY + textSpacing * 2, String(precipitationSum, 0), RIGHT);
     setFont(OpenSans8);
-    drawString(x - textShiftX - textUnitSpacing, y + textShiftY + textSpacing * 2 + 15, "mm", LEFT);
+    drawString(x - textShiftX - textUnitSpacing, y + textShiftY + textSpacing * 2 + 15, precipitationUnit, LEFT);
     setFont(OpenSans16);
     drawString(x - textShiftX - textUnitLessSpacing, y + textShiftY + textSpacing * 3, WindDegToOrdinalDirection(windDirection), RIGHT);
     drawString(x - textShiftX - textUnitLessSpacing, y + textShiftY + textSpacing * 4, String(maxWindSpeed, 0), RIGHT);
     setFont(OpenSans8);
-    drawString(x - textShiftX - textUnitSpacing, y + textShiftY + textSpacing * 4 + 12, "km/h", LEFT);
+    drawString(x - textShiftX - textUnitSpacing, y + textShiftY + textSpacing * 4 + 12, windSpeedUnit, LEFT);
 }
 
 void DisplayNextDayForecast(int x, int y, int dayOfWeek, int conditionCode, float maxTemp, float minTemp)
@@ -431,8 +434,11 @@ void DrawFullUpdateElements()
     const ohab_weather::Weather* weather = ohab_weather::GetWeather(currentState);
     const ohab_weather::CurrentWeather* current = weather->current();
 
+    String windSpeedUnit = weather->windSpeedUnit()->c_str();
+    String precipitationUnit = weather->precipitationUnit()->c_str();
+
     // current wind information
-    DisplayWindSection(137, 150, current->windDirection(), current->windSpeed(), 100);
+    DisplayWindSection(137, 150, current->windDirection(), current->windSpeed(), 100, windSpeedUnit);
 
     // current outdoor temperature
     setFont(OpenSans32);
@@ -462,12 +468,13 @@ void DrawFullUpdateElements()
             today->minTemperature(), 
             today->rain() + today->showers(),
             today->dominantWindDirection(),
-            today->maxWindSpeed());
+            today->maxWindSpeed(),
+            precipitationUnit,
+            windSpeedUnit);
     }
     else
     {
-        DisplayTodayForecast(
-            SCREEN_WIDTH / 2, 50, 255, NAN, NAN, NAN, NAN, NAN);
+        DisplayTodayForecast(SCREEN_WIDTH / 2, 50, 255, NAN, NAN, NAN, NAN, NAN, precipitationUnit, windSpeedUnit);
     }
 
     // forecast for next days
