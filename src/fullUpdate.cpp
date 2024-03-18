@@ -214,6 +214,8 @@ const WeatherGlyphDetails GetWeatherGlyph(int conditionCode, bool isDay)
             return {0x0f016, 5, "ø"}; // wi-lightning
         case 99:  // Heavy hail thunderstorm
             return {0x0f016, 5, "ø  ø  ø"}; // wi-lightning
+        case 255:
+            return {0xf07b, 40}; // wi-na
         default:
             return {0xf075, 2, String(conditionCode)}; // wi-alien
     }
@@ -325,9 +327,12 @@ uint8_t StartWiFi()
     return WiFi.status();
 }
 
-void DrawMoon(int x, int y, double Phase)  // phase is between 0 and 1
+void DrawMoon(int x, int y, float Phase)  // phase is between 0 and 1
 {
   const int diameter = 65;
+
+  if (isnan(Phase))
+    return;
 
   // Draw dark part of moon
   fillCircle(x + diameter - 1, y + diameter, diameter / 2 + 1, LightGrey);
@@ -435,7 +440,7 @@ void DrawFullUpdateElements()
 
     // current outdoor relative humidity
     setFont(OpenSans32);
-    drawString(SCREEN_WIDTH - PARTIAL_AREA_MARGIN - 30, PARTIAL_AREA_Y + PARTIAL_AREA_HEIGHT + 90, String(45.0, 0), RIGHT);
+    drawString(SCREEN_WIDTH - PARTIAL_AREA_MARGIN - 30, PARTIAL_AREA_Y + PARTIAL_AREA_HEIGHT + 90, String(current->relativeHumidity(), 0), RIGHT);
     setFont(OpenSans12);
     drawString(SCREEN_WIDTH - PARTIAL_AREA_MARGIN - 20, PARTIAL_AREA_Y + PARTIAL_AREA_HEIGHT + 90, "%", LEFT);
 
@@ -444,35 +449,67 @@ void DrawFullUpdateElements()
     drawString(SCREEN_WIDTH / 2, 20, TimeManagement::GetFormattedDate(), CENTER);
 
     // forecast for today
-    const int todayConditionCode = 99;
-    DisplayTodayForecast(SCREEN_WIDTH / 2, 50, todayConditionCode, 15.2, -5.3, 2.9, 90.2, 32);
+    auto days = weather->days();
+    const int forecastDays = days->size();
+    const int maxForecastDays = 6;
+    if (forecastDays > 1)
+    {
+        auto today = (*days)[0];
+        DisplayTodayForecast(
+            SCREEN_WIDTH / 2, 50, 
+            today->conditionCode(), 
+            today->maxTemperature(),
+            today->minTemperature(), 
+            today->rain() + today->showers(),
+            today->dominantWindDirection(),
+            today->maxWindSpeed());
+    }
+    else
+    {
+        DisplayTodayForecast(
+            SCREEN_WIDTH / 2, 50, 255, NAN, NAN, NAN, NAN, NAN);
+    }
 
     // forecast for next days
     const int forecastY = SCREEN_HEIGHT - 200;
-    const int forecastDays = 6;
     const int daysMargin = 85;
     const int dayOfWeek = TimeManagement::getDayOfWeek();
     const int conditions[] = {80, 81, 82, 85, 86};
-    for (int day = 1; day < forecastDays; day++)
+    for (int day = 1; day < maxForecastDays; day++)
+    {
+        uint8_t conditionCode = 255;
+        float maxTemperature = NAN;
+        float minTemperature = NAN;
+
+        if (day < forecastDays)
+        {
+            auto forecast = (*days)[day];
+
+            conditionCode = forecast->conditionCode();
+            maxTemperature = forecast->maxTemperature();
+            minTemperature = forecast->minTemperature();
+        }
+
         DisplayNextDayForecast(
-            daysMargin + (day - 1) * ((SCREEN_WIDTH - daysMargin * 2) / (forecastDays - 2)), 
+            daysMargin + (day - 1) * ((SCREEN_WIDTH - daysMargin * 2) / (maxForecastDays - 2)), 
             forecastY, 
             (dayOfWeek + day) % 7, 
-            conditions[day-1],//day+(day/4)*(44+2*(day%4)),
-            5*day, 
-            -1*day
+            conditionCode,
+            maxTemperature, 
+            minTemperature
         );
+    }
 
     // separators for next days
     const int topRowY = forecastY - 35;
     drawFastHLine(0, topRowY, SCREEN_WIDTH, Black);
     drawFastHLine(0, forecastY, SCREEN_WIDTH, Black);
 
-    for (int day = 1; day < forecastDays - 1; day++)
-        drawFastVLine(day * SCREEN_WIDTH / (forecastDays - 1), topRowY, SCREEN_HEIGHT - topRowY, Black);
+    for (int day = 1; day < maxForecastDays - 1; day++)
+        drawFastVLine(day * SCREEN_WIDTH / (maxForecastDays - 1), topRowY, SCREEN_HEIGHT - topRowY, Black);
 
     // moon phase
-    DrawMoon(SCREEN_WIDTH / 2 + 125, 185, 0.15);
+    DrawMoon(SCREEN_WIDTH / 2 + 125, 185, current->moonPhase());
 }
 
 void DoFullUpdate(bool SynchronizeWithNTP)

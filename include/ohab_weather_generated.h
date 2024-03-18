@@ -24,17 +24,32 @@ struct CurrentWeatherBuilder;
 struct Forecast;
 struct ForecastBuilder;
 
+struct Alerts;
+struct AlertsBuilder;
+
 struct Weather FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
   typedef WeatherBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
     VT_CURRENT = 4,
-    VT_DAYS = 6
+    VT_DAYS = 6,
+    VT_ALERTS = 8,
+    VT_WINDSPEEDUNIT = 10,
+    VT_PRECIPITATIONUNIT = 12
   };
   const ohab_weather::CurrentWeather *current() const {
     return GetPointer<const ohab_weather::CurrentWeather *>(VT_CURRENT);
   }
   const ::flatbuffers::Vector<::flatbuffers::Offset<ohab_weather::Forecast>> *days() const {
     return GetPointer<const ::flatbuffers::Vector<::flatbuffers::Offset<ohab_weather::Forecast>> *>(VT_DAYS);
+  }
+  const ohab_weather::Alerts *alerts() const {
+    return GetPointer<const ohab_weather::Alerts *>(VT_ALERTS);
+  }
+  const ::flatbuffers::String *windSpeedUnit() const {
+    return GetPointer<const ::flatbuffers::String *>(VT_WINDSPEEDUNIT);
+  }
+  const ::flatbuffers::String *precipitationUnit() const {
+    return GetPointer<const ::flatbuffers::String *>(VT_PRECIPITATIONUNIT);
   }
   bool Verify(::flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
@@ -43,6 +58,12 @@ struct Weather FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
            VerifyOffset(verifier, VT_DAYS) &&
            verifier.VerifyVector(days()) &&
            verifier.VerifyVectorOfTables(days()) &&
+           VerifyOffset(verifier, VT_ALERTS) &&
+           verifier.VerifyTable(alerts()) &&
+           VerifyOffset(verifier, VT_WINDSPEEDUNIT) &&
+           verifier.VerifyString(windSpeedUnit()) &&
+           VerifyOffset(verifier, VT_PRECIPITATIONUNIT) &&
+           verifier.VerifyString(precipitationUnit()) &&
            verifier.EndTable();
   }
 };
@@ -56,6 +77,15 @@ struct WeatherBuilder {
   }
   void add_days(::flatbuffers::Offset<::flatbuffers::Vector<::flatbuffers::Offset<ohab_weather::Forecast>>> days) {
     fbb_.AddOffset(Weather::VT_DAYS, days);
+  }
+  void add_alerts(::flatbuffers::Offset<ohab_weather::Alerts> alerts) {
+    fbb_.AddOffset(Weather::VT_ALERTS, alerts);
+  }
+  void add_windSpeedUnit(::flatbuffers::Offset<::flatbuffers::String> windSpeedUnit) {
+    fbb_.AddOffset(Weather::VT_WINDSPEEDUNIT, windSpeedUnit);
+  }
+  void add_precipitationUnit(::flatbuffers::Offset<::flatbuffers::String> precipitationUnit) {
+    fbb_.AddOffset(Weather::VT_PRECIPITATIONUNIT, precipitationUnit);
   }
   explicit WeatherBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
@@ -71,8 +101,14 @@ struct WeatherBuilder {
 inline ::flatbuffers::Offset<Weather> CreateWeather(
     ::flatbuffers::FlatBufferBuilder &_fbb,
     ::flatbuffers::Offset<ohab_weather::CurrentWeather> current = 0,
-    ::flatbuffers::Offset<::flatbuffers::Vector<::flatbuffers::Offset<ohab_weather::Forecast>>> days = 0) {
+    ::flatbuffers::Offset<::flatbuffers::Vector<::flatbuffers::Offset<ohab_weather::Forecast>>> days = 0,
+    ::flatbuffers::Offset<ohab_weather::Alerts> alerts = 0,
+    ::flatbuffers::Offset<::flatbuffers::String> windSpeedUnit = 0,
+    ::flatbuffers::Offset<::flatbuffers::String> precipitationUnit = 0) {
   WeatherBuilder builder_(_fbb);
+  builder_.add_precipitationUnit(precipitationUnit);
+  builder_.add_windSpeedUnit(windSpeedUnit);
+  builder_.add_alerts(alerts);
   builder_.add_days(days);
   builder_.add_current(current);
   return builder_.Finish();
@@ -81,12 +117,20 @@ inline ::flatbuffers::Offset<Weather> CreateWeather(
 inline ::flatbuffers::Offset<Weather> CreateWeatherDirect(
     ::flatbuffers::FlatBufferBuilder &_fbb,
     ::flatbuffers::Offset<ohab_weather::CurrentWeather> current = 0,
-    const std::vector<::flatbuffers::Offset<ohab_weather::Forecast>> *days = nullptr) {
+    const std::vector<::flatbuffers::Offset<ohab_weather::Forecast>> *days = nullptr,
+    ::flatbuffers::Offset<ohab_weather::Alerts> alerts = 0,
+    const char *windSpeedUnit = nullptr,
+    const char *precipitationUnit = nullptr) {
   auto days__ = days ? _fbb.CreateVector<::flatbuffers::Offset<ohab_weather::Forecast>>(*days) : 0;
+  auto windSpeedUnit__ = windSpeedUnit ? _fbb.CreateString(windSpeedUnit) : 0;
+  auto precipitationUnit__ = precipitationUnit ? _fbb.CreateString(precipitationUnit) : 0;
   return ohab_weather::CreateWeather(
       _fbb,
       current,
-      days__);
+      days__,
+      alerts,
+      windSpeedUnit__,
+      precipitationUnit__);
 }
 
 struct CurrentWeather FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
@@ -95,7 +139,8 @@ struct CurrentWeather FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
     VT_OUTDOORTEMPERATURE = 4,
     VT_WINDDIRECTION = 6,
     VT_WINDSPEED = 8,
-    VT_PRESSURE = 10
+    VT_RELATIVEHUMIDITY = 10,
+    VT_MOONPHASE = 12
   };
   float outdoorTemperature() const {
     return GetField<float>(VT_OUTDOORTEMPERATURE, 0.0f);
@@ -106,15 +151,19 @@ struct CurrentWeather FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
   float windSpeed() const {
     return GetField<float>(VT_WINDSPEED, 0.0f);
   }
-  float pressure() const {
-    return GetField<float>(VT_PRESSURE, 0.0f);
+  float relativeHumidity() const {
+    return GetField<float>(VT_RELATIVEHUMIDITY, 0.0f);
+  }
+  float moonPhase() const {
+    return GetField<float>(VT_MOONPHASE, 0.0f);
   }
   bool Verify(::flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<float>(verifier, VT_OUTDOORTEMPERATURE, 4) &&
            VerifyField<float>(verifier, VT_WINDDIRECTION, 4) &&
            VerifyField<float>(verifier, VT_WINDSPEED, 4) &&
-           VerifyField<float>(verifier, VT_PRESSURE, 4) &&
+           VerifyField<float>(verifier, VT_RELATIVEHUMIDITY, 4) &&
+           VerifyField<float>(verifier, VT_MOONPHASE, 4) &&
            verifier.EndTable();
   }
 };
@@ -132,8 +181,11 @@ struct CurrentWeatherBuilder {
   void add_windSpeed(float windSpeed) {
     fbb_.AddElement<float>(CurrentWeather::VT_WINDSPEED, windSpeed, 0.0f);
   }
-  void add_pressure(float pressure) {
-    fbb_.AddElement<float>(CurrentWeather::VT_PRESSURE, pressure, 0.0f);
+  void add_relativeHumidity(float relativeHumidity) {
+    fbb_.AddElement<float>(CurrentWeather::VT_RELATIVEHUMIDITY, relativeHumidity, 0.0f);
+  }
+  void add_moonPhase(float moonPhase) {
+    fbb_.AddElement<float>(CurrentWeather::VT_MOONPHASE, moonPhase, 0.0f);
   }
   explicit CurrentWeatherBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
@@ -151,9 +203,11 @@ inline ::flatbuffers::Offset<CurrentWeather> CreateCurrentWeather(
     float outdoorTemperature = 0.0f,
     float windDirection = 0.0f,
     float windSpeed = 0.0f,
-    float pressure = 0.0f) {
+    float relativeHumidity = 0.0f,
+    float moonPhase = 0.0f) {
   CurrentWeatherBuilder builder_(_fbb);
-  builder_.add_pressure(pressure);
+  builder_.add_moonPhase(moonPhase);
+  builder_.add_relativeHumidity(relativeHumidity);
   builder_.add_windSpeed(windSpeed);
   builder_.add_windDirection(windDirection);
   builder_.add_outdoorTemperature(outdoorTemperature);
@@ -278,6 +332,127 @@ inline ::flatbuffers::Offset<Forecast> CreateForecast(
   builder_.add_maxTemperature(maxTemperature);
   builder_.add_minTemperature(minTemperature);
   builder_.add_conditionCode(conditionCode);
+  return builder_.Finish();
+}
+
+struct Alerts FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
+  typedef AlertsBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_VENT = 4,
+    VT_PLUIEINONDATION = 6,
+    VT_ORAGE = 8,
+    VT_INONDATION = 10,
+    VT_NEIGE = 12,
+    VT_CANICULE = 14,
+    VT_GRANDFROID = 16,
+    VT_AVALANCHES = 18,
+    VT_VAGUESUBMERSION = 20
+  };
+  uint8_t vent() const {
+    return GetField<uint8_t>(VT_VENT, 0);
+  }
+  uint8_t pluieInondation() const {
+    return GetField<uint8_t>(VT_PLUIEINONDATION, 0);
+  }
+  uint8_t orage() const {
+    return GetField<uint8_t>(VT_ORAGE, 0);
+  }
+  uint8_t inondation() const {
+    return GetField<uint8_t>(VT_INONDATION, 0);
+  }
+  uint8_t neige() const {
+    return GetField<uint8_t>(VT_NEIGE, 0);
+  }
+  uint8_t canicule() const {
+    return GetField<uint8_t>(VT_CANICULE, 0);
+  }
+  uint8_t grandFroid() const {
+    return GetField<uint8_t>(VT_GRANDFROID, 0);
+  }
+  uint8_t avalanches() const {
+    return GetField<uint8_t>(VT_AVALANCHES, 0);
+  }
+  uint8_t vagueSubmersion() const {
+    return GetField<uint8_t>(VT_VAGUESUBMERSION, 0);
+  }
+  bool Verify(::flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<uint8_t>(verifier, VT_VENT, 1) &&
+           VerifyField<uint8_t>(verifier, VT_PLUIEINONDATION, 1) &&
+           VerifyField<uint8_t>(verifier, VT_ORAGE, 1) &&
+           VerifyField<uint8_t>(verifier, VT_INONDATION, 1) &&
+           VerifyField<uint8_t>(verifier, VT_NEIGE, 1) &&
+           VerifyField<uint8_t>(verifier, VT_CANICULE, 1) &&
+           VerifyField<uint8_t>(verifier, VT_GRANDFROID, 1) &&
+           VerifyField<uint8_t>(verifier, VT_AVALANCHES, 1) &&
+           VerifyField<uint8_t>(verifier, VT_VAGUESUBMERSION, 1) &&
+           verifier.EndTable();
+  }
+};
+
+struct AlertsBuilder {
+  typedef Alerts Table;
+  ::flatbuffers::FlatBufferBuilder &fbb_;
+  ::flatbuffers::uoffset_t start_;
+  void add_vent(uint8_t vent) {
+    fbb_.AddElement<uint8_t>(Alerts::VT_VENT, vent, 0);
+  }
+  void add_pluieInondation(uint8_t pluieInondation) {
+    fbb_.AddElement<uint8_t>(Alerts::VT_PLUIEINONDATION, pluieInondation, 0);
+  }
+  void add_orage(uint8_t orage) {
+    fbb_.AddElement<uint8_t>(Alerts::VT_ORAGE, orage, 0);
+  }
+  void add_inondation(uint8_t inondation) {
+    fbb_.AddElement<uint8_t>(Alerts::VT_INONDATION, inondation, 0);
+  }
+  void add_neige(uint8_t neige) {
+    fbb_.AddElement<uint8_t>(Alerts::VT_NEIGE, neige, 0);
+  }
+  void add_canicule(uint8_t canicule) {
+    fbb_.AddElement<uint8_t>(Alerts::VT_CANICULE, canicule, 0);
+  }
+  void add_grandFroid(uint8_t grandFroid) {
+    fbb_.AddElement<uint8_t>(Alerts::VT_GRANDFROID, grandFroid, 0);
+  }
+  void add_avalanches(uint8_t avalanches) {
+    fbb_.AddElement<uint8_t>(Alerts::VT_AVALANCHES, avalanches, 0);
+  }
+  void add_vagueSubmersion(uint8_t vagueSubmersion) {
+    fbb_.AddElement<uint8_t>(Alerts::VT_VAGUESUBMERSION, vagueSubmersion, 0);
+  }
+  explicit AlertsBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  ::flatbuffers::Offset<Alerts> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = ::flatbuffers::Offset<Alerts>(end);
+    return o;
+  }
+};
+
+inline ::flatbuffers::Offset<Alerts> CreateAlerts(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    uint8_t vent = 0,
+    uint8_t pluieInondation = 0,
+    uint8_t orage = 0,
+    uint8_t inondation = 0,
+    uint8_t neige = 0,
+    uint8_t canicule = 0,
+    uint8_t grandFroid = 0,
+    uint8_t avalanches = 0,
+    uint8_t vagueSubmersion = 0) {
+  AlertsBuilder builder_(_fbb);
+  builder_.add_vagueSubmersion(vagueSubmersion);
+  builder_.add_avalanches(avalanches);
+  builder_.add_grandFroid(grandFroid);
+  builder_.add_canicule(canicule);
+  builder_.add_neige(neige);
+  builder_.add_inondation(inondation);
+  builder_.add_orage(orage);
+  builder_.add_pluieInondation(pluieInondation);
+  builder_.add_vent(vent);
   return builder_.Finish();
 }
 
