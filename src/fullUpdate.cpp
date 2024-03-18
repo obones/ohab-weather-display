@@ -456,7 +456,7 @@ void DrawFullUpdateElements()
 
     // forecast for today
     auto days = weather->days();
-    const int forecastDays = days->size();
+    const int forecastDays = (days) ? days->size() : 0;
     const int maxForecastDays = 6;
     if (forecastDays > 1)
     {
