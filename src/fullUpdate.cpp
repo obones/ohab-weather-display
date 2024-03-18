@@ -406,9 +406,8 @@ getStateResult getLatestStateFromOpenHAB(bool SynchronizeWithNTP)
     else
     {
         String errorString = http.errorToString(httpCode);
-        setFont(OpenSans8);
-        drawString(150, 10, uri, LEFT);
-        drawString(150, 10, errorString, LEFT);
+        setFont(OpenSans12);
+        drawString(SCREEN_WIDTH / 2, 10, uri + "\n" + errorString, LEFT);
 
         Serial.printf("connection failed, error: %s", errorString.c_str());
         wifiClient.stop();
