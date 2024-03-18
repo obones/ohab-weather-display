@@ -28,6 +28,7 @@
 #include "fonts/opensans12.h"
 #include "fonts/opensans12b.h"
 #include "fonts/opensans14.h"
+#include "fonts/opensans14b.h"
 #include "fonts/opensans18.h"
 #include "fonts/opensans16.h"
 #include "fonts/opensans24b.h"
@@ -110,14 +111,148 @@ void DisplayWindSection(int x, int y, float angle, float windSpeed, int compassR
     drawString(x, y + 25, "km/h", CENTER);
 }
 
-void DisplayTodayForecast(int x, int y, float maxTemp, float minTemp, float precipitationSum)
+const char* GetWeatherIcon(int conditionCode, bool isDay)
+{
+    // UCS2 to UTF8 conversion done with https://r12a.github.io/app-conversion/
+    switch (conditionCode)
+    {
+        case 0:
+            return (isDay) ? "\xEF\x80\x8D" : "\xEF\x80\xAE"; // wi-day-sunny, wi-night-clear
+        case 1:
+            return (isDay) ? "\xEF\x80\x8C" : "\xEF\x81\xBE"; // wi-day-sunny-overcast, wi-night-alt-cloudy-high
+        case 2:
+            return (isDay) ? "\xEF\x80\x82" : "\xEF\x82\x86"; // wi-day-cloudy, wi-night-alt-cloudy
+        case 3:
+            return "\xEF\x81\x81"; // wi-cloud
+        case 45:
+        case 48:
+            return "\xEF\x80\x94"; // wi-fog 
+        case 51 ... 99:
+            return "\xEF\x80\x93"; // wi-cloudy
+        default:
+            return "\xEF\x81\xB5"; // wi-alien
+    }
+}
+
+typedef struct 
+{
+    int32_t codePoint;
+    int yOffset;
+    const String precipitation;
+    int precipitationXOffset;
+    int precipitationYOffset;
+}
+WeatherGlyphDetails;
+
+const WeatherGlyphDetails GetWeatherGlyph(int conditionCode, bool isDay)
+{
+    switch (conditionCode)
+    {
+        case 0:   // clear sky
+            return (isDay) ? WeatherGlyphDetails{0xf00d, 5} : WeatherGlyphDetails{0xf02e, 15};  // wi-day-sunny, wi-night-clear
+        case 1:   // mainly clear
+            return (isDay) ? WeatherGlyphDetails{0xf00c, 5} : WeatherGlyphDetails{0xf07e, 5}; // wi-day-sunny-overcast, wi-night-alt-cloudy-high
+        case 2:   // partly clear
+            return (isDay) ? WeatherGlyphDetails{0xf002, 5} : WeatherGlyphDetails{0xf086, 5}; // wi-day-cloudy, wi-night-alt-cloudy
+        case 3:   // overcast
+            return {0xf041, 15}; // wi-cloud
+        case 45:  // fog
+            return {0xf014}; // wi-fog 
+        case 48:  // depositing rime fog
+            return {0xf014, 0, "* * *"}; // wi-fog + rime
+        case 51:  // Light drizzle
+            return {0x0f013, 10, "."}; // wi-cloudy
+        case 53:  // Moderate drizzle
+            return {0x0f013, 10, ". ."}; // wi-cloudy
+        case 55:  // Dense drizzle
+            return {0x0f013, 10, ". . ."}; // wi-cloudy
+        case 56:  // Light freezing drizzle
+            return {0x0f013, 10, ". ¤"}; // wi-cloudy
+        case 57:  // Dense freezing drizzle
+            return {0x0f013, 10, ". ¤ ."}; // wi-cloudy
+        case 61:  // Slight rain
+            return {0x0f013, 10, "/"}; // wi-cloudy
+        case 63:  // Moderate rain
+            return {0x0f013, 10, "/ /"}; // wi-cloudy
+        case 65:  // Heavy rain
+            return {0x0f013, 10, "/ / /"}; // wi-cloudy
+        case 66:  // Light freezing rain
+            return {0x0f013, 10, "/ ¤"}; // wi-cloudy
+        case 67:  // Heavy freezing rain
+            return {0x0f013, 10, "/ ¤ /"}; // wi-cloudy
+        case 71:  // Slight snow fall
+            return {0x0f013, 10, "*"}; // wi-cloudy
+        case 73:  // Moderate snow fall
+            return {0x0f013, 10, "* *", 0, -8}; // wi-cloudy
+        case 75:  // Heavy snow fall
+            return {0x0f013, 10, "* * *", 0, -8}; // wi-cloudy
+        case 77:  // Snow grains
+            return {0x0f013, 10, "° °"}; // wi-cloudy
+        case 80:  // Slight rain showers
+            return (isDay) ? 
+                WeatherGlyphDetails{0xf002, 5, ":", -10, -5} : // wi-day-cloudy 
+                WeatherGlyphDetails{0xf086, 5, ":", -10, -5};  // wi-night-alt-cloudy
+        case 81:  // Moderate rain showers
+            return (isDay) ? 
+                WeatherGlyphDetails{0xf002, 5, ":  :", -10, -5} : // wi-day-cloudy
+                WeatherGlyphDetails{0xf086, 5, ":  :", -10, -5};  // wi-night-alt-cloudy
+        case 82:  // Heavy rain showers
+            return (isDay) ? 
+                WeatherGlyphDetails{0xf002, 5, ":  :  :", -10, -5} : // wi-day-cloudy
+                WeatherGlyphDetails{0xf086, 5, ":  :  :", -10, -5};  // wi-night-alt-cloudy
+        case 85:  // Slight snow showers
+            return (isDay) ? 
+                WeatherGlyphDetails{0xf002, 5, "*", -15} : // wi-day-cloudy
+                WeatherGlyphDetails{0xf086, 5, "*", -15};  // wi-night-alt-cloudy
+        case 86:  // Heavy snow showers
+            return (isDay) ? 
+                WeatherGlyphDetails{0xf002, 5, "* * *", -15, -8} : // wi-day-cloudy
+                WeatherGlyphDetails{0xf086, 5, "* * *", -15, -8};  // wi-night-alt-cloudy
+        case 95:  // Slight or moderate thunderstorm
+            return {0x0f016, 10}; // wi-lightning
+        case 96:  // Slight hail thunderstorm
+            return {0x0f016, 5, "ø"}; // wi-lightning
+        case 99:  // Heavy hail thunderstorm
+            return {0x0f016, 5, "ø  ø  ø"}; // wi-lightning
+        default:
+            return {0xf075, 2, String(conditionCode)}; // wi-alien
+    }
+}
+
+// moonDay 0 is the day after the full moon
+const String GetMoonIcon(int moonDay) 
+{
+    return String("\xEF\x83") + char(0xAB + moonDay);
+}
+
+void DrawWeatherIcon(const GFXfont &glyphFont, const GFXfont &precipitationFont, int x, int y, int conditionCode, bool isDay, bool centerVertically)
+{
+    WeatherGlyphDetails details = GetWeatherGlyph(conditionCode, isDay);
+
+    float scale = glyphFont.advance_y / WeatherIcons48.advance_y;
+    int yOffset = ceil(details.yOffset * scale);
+
+    GFXglyph* glyph;
+    get_glyph(&glyphFont, details.codePoint, &glyph);
+
+    int32_t glyphX = x - glyph->width / 2;
+    int32_t glyphY = (centerVertically) ? y + glyph->height / 2 : y + glyph->height + yOffset;
+    FontProperties props = font_properties_default();
+    draw_char(&glyphFont, FrameBuffer, &glyphX, glyphY, SCREEN_WIDTH / 2, SCREEN_HEIGHT, details.codePoint, &props);
+
+    const int precipitationXOffset = ceil(details.precipitationXOffset * scale); 
+    const int precipitationYOffset = ceil((15 + details.precipitationYOffset) * scale) + ((centerVertically) ? yOffset : 0); 
+    setFont(precipitationFont);
+    drawString(x + precipitationXOffset, glyphY + precipitationYOffset, details.precipitation, CENTER);
+}
+
+void DisplayTodayForecast(int x, int y, int conditionCode, float maxTemp, float minTemp, float precipitationSum)
 {
     const int textShiftX = 120;
     const int textShiftY = 40;
     const int textSpacing = 45;
 
-    setFont(WeatherIcons64);
-    drawString(x, y, "\xef\x80\x8d", CENTER);
+    DrawWeatherIcon(WeatherIcons64, OpenSans24B, x, y + textShiftY + textSpacing, conditionCode, true, true);
 
     setFont(OpenSans16);
     drawString(x - textShiftX, y + textShiftY, String(maxTemp, 0) + "°", RIGHT);
@@ -127,16 +262,19 @@ void DisplayTodayForecast(int x, int y, float maxTemp, float minTemp, float prec
     drawString(x - textShiftX - 7, y + textShiftY + textSpacing * 2 + 15, "mm", LEFT);
 }
 
-void DisplayNextDaysForecast(int x, int y, int dayOfWeek, float maxTemp, float minTemp)
+void DisplayNextDaysForecast(int x, int y, int dayOfWeek, int conditionCode, float maxTemp, float minTemp)
 {
     const int textShiftX = 60;
     const int textShiftY = 150;
 
     setFont(OpenSans14);
-    drawString(x, y - 20, Lang::weekday_A[dayOfWeek], CENTER);
+    int weekDayNameShiftY = 30;
+    String WeekDayName = Lang::weekday_A[dayOfWeek];
+    if (WeekDayName.indexOf("J") >= 0)
+       weekDayNameShiftY += 5; 
+    drawString(x, y - weekDayNameShiftY, WeekDayName, CENTER);
 
-    setFont(WeatherIcons48);
-    drawString(x, y, "\xef\x80\x8d", CENTER);
+    DrawWeatherIcon(WeatherIcons48, OpenSans14B, x, y, conditionCode, true, false);
 
     setFont(OpenSans14);
     drawString(x - textShiftX, y + textShiftY, String(minTemp, 0) + "°", LEFT);
@@ -248,17 +386,20 @@ void DrawFullUpdateElements()
     drawString(SCREEN_WIDTH / 2, 20, TimeManagement::GetFormattedDate(), CENTER);
 
     // forecast for today
-    DisplayTodayForecast(SCREEN_WIDTH / 2, 50, 15.2, -5.3, 2.9);
+    const int todayConditionCode = 99;
+    DisplayTodayForecast(SCREEN_WIDTH / 2, 50, todayConditionCode, 15.2, -5.3, 2.9);
 
     // forecast for next days
     const int forecastDays = 6;
     const int daysMargin = 85;
     const int dayOfWeek = TimeManagement::getDayOfWeek();
+    const int conditions[] = {80, 81, 82, 85, 86};
     for (int day = 1; day < forecastDays; day++)
         DisplayNextDaysForecast(
             daysMargin + (day - 1) * ((SCREEN_WIDTH - daysMargin * 2) / (forecastDays - 2)), 
             SCREEN_HEIGHT - 200, 
             (dayOfWeek + day) % 7, 
+            conditions[day-1],//day+(day/4)*(44+2*(day%4)),
             5*day, 
             -1*day
         );
