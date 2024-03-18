@@ -225,6 +225,15 @@ const String GetMoonIcon(int moonDay)
     return String("\xEF\x83") + char(0xAB + moonDay);
 }
 
+void draw_char(const GFXfont &glyphFont, int32_t codePoint, int x, int y)
+{
+    int32_t glyphX = x;
+    int32_t glyphY = y;
+
+    FontProperties props = font_properties_default();
+    draw_char(&glyphFont, FrameBuffer, &glyphX, glyphY, SCREEN_WIDTH / 2, SCREEN_HEIGHT, codePoint, &props);
+}
+
 void DrawWeatherIcon(const GFXfont &glyphFont, const GFXfont &precipitationFont, int x, int y, int conditionCode, bool isDay, bool centerVertically)
 {
     WeatherGlyphDetails details = GetWeatherGlyph(conditionCode, isDay);
@@ -237,8 +246,7 @@ void DrawWeatherIcon(const GFXfont &glyphFont, const GFXfont &precipitationFont,
 
     int32_t glyphX = x - glyph->width / 2;
     int32_t glyphY = (centerVertically) ? y + glyph->height / 2 : y + glyph->height + yOffset;
-    FontProperties props = font_properties_default();
-    draw_char(&glyphFont, FrameBuffer, &glyphX, glyphY, SCREEN_WIDTH / 2, SCREEN_HEIGHT, details.codePoint, &props);
+    draw_char(glyphFont, details.codePoint, glyphX, glyphY);
 
     const int precipitationXOffset = ceil(details.precipitationXOffset * scale); 
     const int precipitationYOffset = ceil((15 + details.precipitationYOffset) * scale) + ((centerVertically) ? yOffset : 0); 
