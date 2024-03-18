@@ -426,10 +426,8 @@ void DoFullUpdate(bool SynchronizeWithNTP)
             issueText = "Failed to retrieve time!";
             break;
         case ServerIssue:
-            setFont(OpenSans8);
-            drawString(10, 10, OpenHABServerName, LEFT);
-            drawString(10, 20, String(OpenHABServerPort), LEFT);
-            drawString(10, 30, OpenHABItemName, LEFT);
+            setFont(OpenSans12);
+            drawString(10, 10, String(OpenHABServerName) + "\n" + String(OpenHABServerPort) + "\n" + OpenHABItemName, LEFT);
             issueText = "Failed to communicate\nwith OpenHAB server!";
             break;
     }
