@@ -433,6 +433,12 @@ void DrawFullUpdateElements()
     setFont(OpenSans32);
     drawString(SCREEN_WIDTH - PARTIAL_AREA_MARGIN, PARTIAL_AREA_Y + PARTIAL_AREA_HEIGHT, String(current->outdoorTemperature(), 1) + "°", RIGHT);
 
+    // current outdoor relative humidity
+    setFont(OpenSans32);
+    drawString(SCREEN_WIDTH - PARTIAL_AREA_MARGIN - 30, PARTIAL_AREA_Y + PARTIAL_AREA_HEIGHT + 90, String(45.0, 0), RIGHT);
+    setFont(OpenSans12);
+    drawString(SCREEN_WIDTH - PARTIAL_AREA_MARGIN - 20, PARTIAL_AREA_Y + PARTIAL_AREA_HEIGHT + 90, "%", LEFT);
+
     // current full string date
     setFont(OpenSans16);
     drawString(SCREEN_WIDTH / 2, 20, TimeManagement::GetFormattedDate(), CENTER);
