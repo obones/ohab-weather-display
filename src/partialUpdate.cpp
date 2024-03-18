@@ -51,10 +51,6 @@ void refreshBattery()
 {
     float batteryVoltage = BatteryManagement::GetBatteryVoltage();
 
-    esp_reset_reason_t resetReason = esp_reset_reason();
-    setFont(OpenSans16);
-    drawString(partialUpdateArea.x, partialUpdateArea.y + partialUpdateArea.height - 40, String(resetReason), LEFT);
-
     if (batteryVoltage > 1 )  // Only display if there is a valid reading
     { 
         Serial.println("\nVoltage = " + String(batteryVoltage));
