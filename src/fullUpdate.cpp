@@ -254,20 +254,27 @@ void DrawWeatherIcon(const GFXfont &glyphFont, const GFXfont &precipitationFont,
     drawString(x + precipitationXOffset, glyphY + precipitationYOffset, details.precipitation, CENTER);
 }
 
-void DisplayTodayForecast(int x, int y, int conditionCode, float maxTemp, float minTemp, float precipitationSum)
+void DisplayTodayForecast(int x, int y, int conditionCode, float maxTemp, float minTemp, float precipitationSum, float windDirection, float maxWindSpeed)
 {
     const int textShiftX = 120;
-    const int textShiftY = 40;
+    const int textShiftY = 25;
     const int textSpacing = 45;
+    const int textUnitLessSpacing = 12;
+    const int textUnitSpacing = textUnitLessSpacing - 5;
 
     DrawWeatherIcon(WeatherIcons64, OpenSans24B, x, y + textShiftY + textSpacing, conditionCode, true, true);
 
     setFont(OpenSans16);
     drawString(x - textShiftX, y + textShiftY, String(maxTemp, 0) + "°", RIGHT);
     drawString(x - textShiftX, y + textShiftY + textSpacing, String(minTemp, 0) + "°", RIGHT);
-    drawString(x - textShiftX - 12, y + textShiftY + textSpacing * 2, String(precipitationSum, 0), RIGHT);
+    drawString(x - textShiftX - textUnitLessSpacing, y + textShiftY + textSpacing * 2, String(precipitationSum, 0), RIGHT);
     setFont(OpenSans8);
-    drawString(x - textShiftX - 7, y + textShiftY + textSpacing * 2 + 15, "mm", LEFT);
+    drawString(x - textShiftX - textUnitSpacing, y + textShiftY + textSpacing * 2 + 15, "mm", LEFT);
+    setFont(OpenSans16);
+    drawString(x - textShiftX - textUnitLessSpacing, y + textShiftY + textSpacing * 3, WindDegToOrdinalDirection(windDirection), RIGHT);
+    drawString(x - textShiftX - textUnitLessSpacing, y + textShiftY + textSpacing * 4, String(maxWindSpeed, 0), RIGHT);
+    setFont(OpenSans8);
+    drawString(x - textShiftX - textUnitSpacing, y + textShiftY + textSpacing * 4 + 12, "km/h", LEFT);
 }
 
 void DisplayNextDayForecast(int x, int y, int dayOfWeek, int conditionCode, float maxTemp, float minTemp)
@@ -395,7 +402,7 @@ void DrawFullUpdateElements()
 
     // forecast for today
     const int todayConditionCode = 99;
-    DisplayTodayForecast(SCREEN_WIDTH / 2, 50, todayConditionCode, 15.2, -5.3, 2.9);
+    DisplayTodayForecast(SCREEN_WIDTH / 2, 50, todayConditionCode, 15.2, -5.3, 2.9, 90.2, 32);
 
     // forecast for next days
     const int forecastY = SCREEN_HEIGHT - 200;
