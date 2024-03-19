@@ -236,7 +236,35 @@ void draw_char(const GFXfont &glyphFont, int32_t codePoint, int x, int y)
     draw_char(&glyphFont, FrameBuffer, &glyphX, glyphY, SCREEN_WIDTH / 2, SCREEN_HEIGHT, codePoint, &props);
 }
 
-void DrawWeatherIcon(const GFXfont &glyphFont, const GFXfont &precipitationFont, int x, int y, int conditionCode, bool isDay, bool centerVertically)
+void DrawWindItem(int x, int y, float scale)
+{
+    const int width = ceil(50 * scale);
+    const int curlWidth = ceil(4 * scale);
+    for (int step = 0; step <= ceil(2 * scale); step ++)
+    {
+        drawFastHLine(x, y + step, width, DarkGrey);
+        drawLine(x + width, y + step, x + width + curlWidth, y + step - curlWidth, DarkGrey); 
+        drawFastVLine(x + width + curlWidth, y + step - 2 * curlWidth, curlWidth, DarkGrey);
+        drawLine(x + width + curlWidth, y + step - 2 * curlWidth, x + width, y + step - 3 * curlWidth, DarkGrey);
+    }
+}
+
+void DrawWind(int x, int y, float windSpeed, float scale)
+{
+    const int XStep = ceil(8 * scale);
+    const int YStep = ceil(10 * scale);
+    
+    if (windSpeed > 15)
+        DrawWindItem(x, y, scale);
+
+    if (windSpeed > 30)        
+        DrawWindItem(x + XStep, y + YStep, scale);
+
+    if (windSpeed > 45)
+        DrawWindItem(x + 2 * XStep, y + 2 * YStep, scale);
+}
+
+void DrawWeatherIcon(const GFXfont &glyphFont, const GFXfont &precipitationFont, int x, int y, int conditionCode, bool isDay, float windSpeed, bool centerVertically)
 {
     WeatherGlyphDetails details = GetWeatherGlyph(conditionCode, isDay);
 
@@ -254,6 +282,10 @@ void DrawWeatherIcon(const GFXfont &glyphFont, const GFXfont &precipitationFont,
     const int precipitationYOffset = ceil((15 + details.precipitationYOffset) * scale) + ((centerVertically) ? yOffset : 0); 
     setFont(precipitationFont);
     drawString(x + precipitationXOffset, glyphY + precipitationYOffset, details.precipitation, CENTER);
+
+    const int windXOffset = ceil(25 * scale);
+    const int windYOffset = ceil(0 * scale);
+    DrawWind(glyphX + windXOffset, glyphY + precipitationYOffset + windYOffset, windSpeed, scale);
 }
 
 void DisplayTodayForecast(
@@ -267,7 +299,7 @@ void DisplayTodayForecast(
     const int textUnitLessSpacing = 12;
     const int textUnitSpacing = textUnitLessSpacing - 5;
 
-    DrawWeatherIcon(WeatherIcons64, OpenSans24B, x, y + textShiftY + textSpacing, conditionCode, true, true);
+    DrawWeatherIcon(WeatherIcons64, OpenSans24B, x, y + textShiftY + textSpacing, conditionCode, true, maxWindSpeed, true);
 
     setFont(OpenSans16);
     drawString(x - textShiftX, y + textShiftY, String(maxTemp, 0) + "°", RIGHT);
@@ -282,10 +314,10 @@ void DisplayTodayForecast(
     drawString(x - textShiftX - textUnitSpacing, y + textShiftY + textSpacing * 4 + 12, windSpeedUnit, LEFT);
 }
 
-void DisplayNextDayForecast(int x, int y, int dayOfWeek, int conditionCode, float maxTemp, float minTemp)
+void DisplayNextDayForecast(int x, int y, int dayOfWeek, int conditionCode, float maxTemp, float minTemp, float maxWindSpeed)
 {
     const int textShiftX = 60;
-    const int textShiftY = 150;
+    const int textShiftY = 160;
 
     setFont(OpenSans14);
     int weekDayNameShiftY = 30;
@@ -294,11 +326,11 @@ void DisplayNextDayForecast(int x, int y, int dayOfWeek, int conditionCode, floa
        weekDayNameShiftY += 5; 
     drawString(x, y - weekDayNameShiftY, WeekDayName, CENTER);
 
-    DrawWeatherIcon(WeatherIcons48, OpenSans14B, x, y, conditionCode, true, false);
+    DrawWeatherIcon(WeatherIcons48, OpenSans14B, x, y, conditionCode, true, maxWindSpeed, false);
 
     setFont(OpenSans14);
     drawString(x - textShiftX, y + textShiftY, String(minTemp, 0) + "°", LEFT);
-    drawString(x + textShiftX, y + textShiftY, String(maxTemp, 0) + "°", RIGHT);
+    drawString(x + textShiftX + 10, y + textShiftY, String(maxTemp, 0) + "°", RIGHT);
 }
 
 uint8_t StartWiFi() 
@@ -487,6 +519,7 @@ void DrawFullUpdateElements()
         uint8_t conditionCode = 255;
         float maxTemperature = NAN;
         float minTemperature = NAN;
+        float maxWindSpeed = NAN;
 
         if (day < forecastDays)
         {
@@ -495,6 +528,7 @@ void DrawFullUpdateElements()
             conditionCode = forecast->conditionCode();
             maxTemperature = forecast->maxTemperature();
             minTemperature = forecast->minTemperature();
+            maxWindSpeed = forecast->maxWindSpeed();
         }
 
         DisplayNextDayForecast(
@@ -503,7 +537,8 @@ void DrawFullUpdateElements()
             (dayOfWeek + day) % 7, 
             conditionCode,
             maxTemperature, 
-            minTemperature
+            minTemperature,
+            maxWindSpeed
         );
     }
 
