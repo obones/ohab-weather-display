@@ -4,7 +4,7 @@ table Weather
 {
     current: CurrentWeather;
     days: [Forecast];
-    alerts: Alerts;
+    alert: Alert;
     windSpeedUnit: string;
     precipitationUnit: string;
 }
@@ -31,17 +31,10 @@ table Forecast
     showers: float;
 }
 
-table Alerts
+table Alert
 {
-    vent: ubyte;
-    pluieInondation: ubyte;
-    orage: ubyte;
-    inondation: ubyte;
-    neige: ubyte;
-    canicule: ubyte;
-    grandFroid: ubyte;
-    avalanches: ubyte;
-    vagueSubmersion: ubyte;
+    level: string;
+    text: string;
 }
 
 root_type Weather;

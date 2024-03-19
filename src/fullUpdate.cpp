@@ -403,6 +403,13 @@ void DrawMoon(int x, int y, float Phase)  // phase is between 0 and 1
   drawCircle(x + diameter - 1, y + diameter, diameter / 2, Black);
 }
 
+void DrawAlert(int x, int y, String level, String text)
+{
+    setFont(OpenSans14B);
+    drawString(x, y, level, CENTER);
+    drawString(x, y + currentFont.advance_y, text, CENTER);
+}
+
 void StopWiFi() 
 {
     WiFi.disconnect();
@@ -552,6 +559,11 @@ void DrawFullUpdateElements()
 
     // moon phase
     DrawMoon(SCREEN_WIDTH / 2 + 125, 185, current->moonPhase());
+
+    // weather alert phrase
+    auto alert = weather->alert();
+    if (alert)
+        DrawAlert(SCREEN_WIDTH / 2 + 180, PARTIAL_AREA_Y + PARTIAL_AREA_HEIGHT - PARTIAL_AREA_MARGIN, alert->level()->c_str(), alert->text()->c_str());
 }
 
 void DoFullUpdate(bool SynchronizeWithNTP)
