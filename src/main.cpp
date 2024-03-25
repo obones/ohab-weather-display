@@ -76,7 +76,7 @@ void InitializeSystem()
     if (!TimeManagement::Setup())
     {
         setFont(OpenSans26B);
-        drawString(10, SCREEN_HEIGHT / 2, "Cannot setup RTC", LEFT);
+        drawString(10, SCREEN_HEIGHT / 2, Lang::Status::RTCError, LEFT);
     }
 }
 

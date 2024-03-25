@@ -596,15 +596,15 @@ void DoFullUpdate(bool SynchronizeWithNTP)
             DrawFullUpdateElements();
             break;
         case WifiIssue:
-            issueText = "Failed to connect to WiFi!";
+            issueText = Lang::Status::FailedWiFi;
             break;
         case TimeIssue:
-            issueText = "Failed to retrieve time!";
+            issueText = Lang::Status::FailedTime;
             break;
         case ServerIssue:
             setFont(OpenSans12);
             drawString(10, 10, String(OpenHABServerName) + "\n" + String(OpenHABServerPort) + "\n" + OpenHABItemName, LEFT);
-            issueText = "Failed to communicate\nwith OpenHAB server!";
+            issueText = Lang::Status::FailedOpenHAB;
             break;
     }
 

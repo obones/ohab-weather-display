@@ -54,5 +54,9 @@ namespace Lang
     namespace Status
     {
         extern const char* LowBattery;
+        extern const char* FailedWiFi;
+        extern const char* FailedTime;
+        extern const char* FailedOpenHAB;
+        extern const char* RTCError;
     }
 }

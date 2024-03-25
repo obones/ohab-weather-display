@@ -51,6 +51,10 @@ namespace Lang
     namespace Status
     {
         const char* LowBattery = "Low battery";
+        const char* FailedWiFi = "Failed to connect to WiFi!";
+        const char* FailedTime = "Failed to retrieve time!";
+        const char* FailedOpenHAB = "Failed to communicate\nwith OpenHAB server!";
+        const char* RTCError = "Cannot setup RTC";
     }
 }
 
