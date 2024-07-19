@@ -295,7 +295,7 @@ void DisplayTodayForecast(
 
 void DisplayNextDayForecast(int x, int y, int dayOfWeek, int conditionCode, float maxTemp, float minTemp, float maxWindSpeed)
 {
-    const int textShiftX = 60;
+    const int textShiftX = 80;
     const int textShiftY = 155;
 
     setFont(OpenSans14);
@@ -309,7 +309,7 @@ void DisplayNextDayForecast(int x, int y, int dayOfWeek, int conditionCode, floa
 
     setFont(OpenSans16);
     drawString(x - textShiftX, y + textShiftY, String(minTemp, 0) + "°", LEFT);
-    drawString(x + textShiftX + 20, y + textShiftY, String(maxTemp, 0) + "°", RIGHT);
+    drawString(x + textShiftX, y + textShiftY, String(maxTemp, 0) + "°", RIGHT);
 }
 
 uint8_t StartWiFi()
@@ -515,9 +515,11 @@ void DrawFullUpdateElements()
 
     // forecast for next days
     const int forecastY = SCREEN_HEIGHT - 200;
-    const int daysMargin = 85;
+    const int daysLeftMargin = 10;
     const int dayOfWeek = TimeManagement::getDayOfWeek();
     const int conditions[] = {80, 81, 82, 85, 86};
+    const double nextDayCellWidth = (SCREEN_WIDTH - daysLeftMargin) / (maxForecastDays - 1);
+
     for (int day = 1; day < maxForecastDays; day++)
     {
         uint8_t conditionCode = 255;
@@ -536,7 +538,7 @@ void DrawFullUpdateElements()
         }
 
         DisplayNextDayForecast(
-            daysMargin + (day - 1) * ((SCREEN_WIDTH - daysMargin * 2) / (maxForecastDays - 2)),
+            daysLeftMargin + (nextDayCellWidth / 2) + (day - 1) * nextDayCellWidth,
             forecastY,
             (dayOfWeek + day) % 7,
             conditionCode,
@@ -552,7 +554,7 @@ void DrawFullUpdateElements()
     drawFastHLine(0, forecastY, SCREEN_WIDTH, Black);
 
     for (int day = 1; day < maxForecastDays - 1; day++)
-        drawFastVLine(day * SCREEN_WIDTH / (maxForecastDays - 1), topRowY, SCREEN_HEIGHT - topRowY, Black);
+        drawFastVLine(daysLeftMargin + day * nextDayCellWidth, topRowY, SCREEN_HEIGHT - topRowY, Black);
 
     // moon phase
     DrawMoon(SCREEN_WIDTH / 2 + 125, 185, current->moonPhase());
