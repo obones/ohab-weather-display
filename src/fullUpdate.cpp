@@ -4,8 +4,8 @@
  * See the NOTICE file(s) distributed with this work for additional
  * information.
  *
- * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
- * If a copy of the MPL was not distributed with this file, 
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+ * If a copy of the MPL was not distributed with this file,
  * you can obtain one at https://mozilla.org/MPL/2.0/.
  *
  * SPDX-License-Identifier: MPL-2.0
@@ -31,6 +31,8 @@
 #include "fonts/opensans14b.h"
 #include "fonts/opensans18.h"
 #include "fonts/opensans16.h"
+#include "fonts/opensans20.h"
+#include "fonts/opensans24.h"
 #include "fonts/opensans24b.h"
 #include "fonts/opensans26b.h"
 #include "fonts/opensans32.h"
@@ -49,12 +51,12 @@ String Date_str = "-- --- ----";
 uint8_t* currentState = nullptr;
 int wifi_signal;
 
-void edp_update() 
+void edp_update()
 {
   epd_draw_grayscale_image(epd_full_screen(), FrameBuffer); // Update the screen
 }
 
-String WindDegToOrdinalDirection(float windDirection) 
+String WindDegToOrdinalDirection(float windDirection)
 {
     if (windDirection >= 348.75 || windDirection < 11.25)  return Lang::TXT_N;
     if (windDirection >=  11.25 && windDirection < 33.75)  return Lang::TXT_NNE;
@@ -127,7 +129,7 @@ const char* GetWeatherIcon(int conditionCode, bool isDay)
             return "\xEF\x81\x81"; // wi-cloud
         case 45:
         case 48:
-            return "\xEF\x80\x94"; // wi-fog 
+            return "\xEF\x80\x94"; // wi-fog
         case 51 ... 99:
             return "\xEF\x80\x93"; // wi-cloudy
         default:
@@ -135,7 +137,7 @@ const char* GetWeatherIcon(int conditionCode, bool isDay)
     }
 }
 
-typedef struct 
+typedef struct
 {
     int32_t codePoint;
     int yOffset;
@@ -158,7 +160,7 @@ const WeatherGlyphDetails GetWeatherGlyph(int conditionCode, bool isDay)
         case 3:   // overcast
             return {0xf041, 15}; // wi-cloud
         case 45:  // fog
-            return {0xf014}; // wi-fog 
+            return {0xf014}; // wi-fog
         case 48:  // depositing rime fog
             return {0xf014, 0, "* * *"}; // wi-fog + rime
         case 51:  // Light drizzle
@@ -190,23 +192,23 @@ const WeatherGlyphDetails GetWeatherGlyph(int conditionCode, bool isDay)
         case 77:  // Snow grains
             return {0x0f013, 10, "° °"}; // wi-cloudy
         case 80:  // Slight rain showers
-            return (isDay) ? 
-                WeatherGlyphDetails{0xf002, 5, ":", -10, -5} : // wi-day-cloudy 
+            return (isDay) ?
+                WeatherGlyphDetails{0xf002, 5, ":", -10, -5} : // wi-day-cloudy
                 WeatherGlyphDetails{0xf086, 5, ":", -10, -5};  // wi-night-alt-cloudy
         case 81:  // Moderate rain showers
-            return (isDay) ? 
+            return (isDay) ?
                 WeatherGlyphDetails{0xf002, 5, ":  :", -10, -5} : // wi-day-cloudy
                 WeatherGlyphDetails{0xf086, 5, ":  :", -10, -5};  // wi-night-alt-cloudy
         case 82:  // Heavy rain showers
-            return (isDay) ? 
+            return (isDay) ?
                 WeatherGlyphDetails{0xf002, 5, ":  :  :", -10, -5} : // wi-day-cloudy
                 WeatherGlyphDetails{0xf086, 5, ":  :  :", -10, -5};  // wi-night-alt-cloudy
         case 85:  // Slight snow showers
-            return (isDay) ? 
+            return (isDay) ?
                 WeatherGlyphDetails{0xf002, 5, "*", -15} : // wi-day-cloudy
                 WeatherGlyphDetails{0xf086, 5, "*", -15};  // wi-night-alt-cloudy
         case 86:  // Heavy snow showers
-            return (isDay) ? 
+            return (isDay) ?
                 WeatherGlyphDetails{0xf002, 5, "* * *", -15, -8} : // wi-day-cloudy
                 WeatherGlyphDetails{0xf086, 5, "* * *", -15, -8};  // wi-night-alt-cloudy
         case 95:  // Slight or moderate thunderstorm
@@ -223,7 +225,7 @@ const WeatherGlyphDetails GetWeatherGlyph(int conditionCode, bool isDay)
 }
 
 // moonDay 0 is the day after the full moon
-const String GetMoonIcon(int moonDay) 
+const String GetMoonIcon(int moonDay)
 {
     return String("\xEF\x83") + char(0xAB + moonDay);
 }
@@ -244,7 +246,7 @@ void DrawWindItem(int x, int y, float scale)
     for (int step = 0; step <= ceil(2 * scale); step ++)
     {
         drawFastHLine(x, y + step, width, DarkGrey);
-        drawLine(x + width, y + step, x + width + curlWidth, y + step - curlWidth, DarkGrey); 
+        drawLine(x + width, y + step, x + width + curlWidth, y + step - curlWidth, DarkGrey);
         drawFastVLine(x + width + curlWidth, y + step - 2 * curlWidth, curlWidth, DarkGrey);
         drawLine(x + width + curlWidth, y + step - 2 * curlWidth, x + width, y + step - 3 * curlWidth, DarkGrey);
     }
@@ -254,11 +256,11 @@ void DrawWind(int x, int y, float windSpeed, float scale)
 {
     const int XStep = ceil(8 * scale);
     const int YStep = ceil(10 * scale);
-    
+
     if (windSpeed > 15)
         DrawWindItem(x, y, scale);
 
-    if (windSpeed > 30)        
+    if (windSpeed > 30)
         DrawWindItem(x + XStep, y + YStep, scale);
 
     if (windSpeed > 45)
@@ -279,8 +281,8 @@ void DrawWeatherIcon(const GFXfont &glyphFont, const GFXfont &precipitationFont,
     int32_t glyphY = (centerVertically) ? y + glyph->height / 2 : y + glyph->height + yOffset;
     draw_char(glyphFont, details.codePoint, glyphX, glyphY);
 
-    const int precipitationXOffset = ceil(details.precipitationXOffset * scale); 
-    const int precipitationYOffset = ceil((15 + details.precipitationYOffset) * scale) + ((centerVertically) ? yOffset : 0); 
+    const int precipitationXOffset = ceil(details.precipitationXOffset * scale);
+    const int precipitationYOffset = ceil((15 + details.precipitationYOffset) * scale) + ((centerVertically) ? yOffset : 0);
     setFont(precipitationFont);
     drawString(x + precipitationXOffset, glyphY + precipitationYOffset, details.precipitation, CENTER);
 
@@ -290,7 +292,7 @@ void DrawWeatherIcon(const GFXfont &glyphFont, const GFXfont &precipitationFont,
 }
 
 void DisplayTodayForecast(
-    int x, int y, 
+    int x, int y,
     int conditionCode, float maxTemp, float minTemp, float precipitationSum, float windDirection, float maxWindSpeed,
     String precipitationUnit, String windSpeedUnit)
 {
@@ -324,7 +326,7 @@ void DisplayNextDayForecast(int x, int y, int dayOfWeek, int conditionCode, floa
     int weekDayNameShiftY = 30;
     String WeekDayName = Lang::weekday_A[dayOfWeek];
     if (WeekDayName.indexOf("J") >= 0)
-       weekDayNameShiftY += 5; 
+       weekDayNameShiftY += 5;
     drawString(x, y - weekDayNameShiftY, WeekDayName, CENTER);
 
     DrawWeatherIcon(WeatherIcons48, OpenSans14B, x, y, conditionCode, true, maxWindSpeed, false);
@@ -334,7 +336,7 @@ void DisplayNextDayForecast(int x, int y, int dayOfWeek, int conditionCode, floa
     drawString(x + textShiftX + 10, y + textShiftY, String(maxTemp, 0) + "°", RIGHT);
 }
 
-uint8_t StartWiFi() 
+uint8_t StartWiFi()
 {
     Serial.println("\r\nConnecting to: " + String(ssid));
     WiFi.disconnect();
@@ -342,7 +344,7 @@ uint8_t StartWiFi()
     WiFi.setAutoConnect(true);
     WiFi.setAutoReconnect(true);
     WiFi.begin(ssid, password);
-    if (WiFi.waitForConnectResult() != WL_CONNECTED) 
+    if (WiFi.waitForConnectResult() != WL_CONNECTED)
     {
         Serial.printf("STA: Failed!\n");
         WiFi.disconnect(false);
@@ -350,13 +352,13 @@ uint8_t StartWiFi()
         WiFi.begin(ssid, password);
     }
 
-    if (WiFi.status() == WL_CONNECTED) 
+    if (WiFi.status() == WL_CONNECTED)
     {
         wifi_signal = WiFi.RSSI(); // Get Wifi Signal strength now, because the WiFi will be turned off to save power!
         Serial.println("WiFi connected at: " + WiFi.localIP().toString());
     }
     else
-    { 
+    {
         Serial.println("WiFi connection *** FAILED ***");
     }
 
@@ -373,18 +375,18 @@ void DrawMoon(int x, int y, float Phase)  // phase is between 0 and 1
     // Draw dark part of moon
     fillCircle(x + diameter - 1, y + diameter, diameter / 2 + 1, Grey);
     const int number_of_lines = 90;
-    for (double Ypos = 0; Ypos <= number_of_lines / 2; Ypos++) 
+    for (double Ypos = 0; Ypos <= number_of_lines / 2; Ypos++)
     {
         double Xpos = sqrt(number_of_lines / 2 * number_of_lines / 2 - Ypos * Ypos);
         // Determine the edges of the lighted part of the moon
         double Rpos = 2 * Xpos;
         double Xpos1, Xpos2;
-        if (Phase < 0.5) 
+        if (Phase < 0.5)
         {
             Xpos1 = -Xpos;
             Xpos2 = Rpos - 2 * Phase * Rpos - Xpos;
         }
-        else 
+        else
         {
             Xpos1 = Xpos;
             Xpos2 = Xpos - 2 * Phase * Rpos + Rpos;
@@ -425,7 +427,7 @@ void DrawAlert(int x, int y, String level, String text)
     drawString(x, y + currentFont.advance_y, text, CENTER);
 }
 
-void StopWiFi() 
+void StopWiFi()
 {
     WiFi.disconnect();
     WiFi.mode(WIFI_OFF);
@@ -451,7 +453,7 @@ getStateResult getLatestStateFromOpenHAB(bool SynchronizeWithNTP)
 
     http.begin(wifiClient, OpenHABServerName, OpenHABServerPort, uri); //http.begin(uri,test_root_ca); //HTTPS example connection
     int httpCode = http.GET();
-    if (httpCode == HTTP_CODE_OK) 
+    if (httpCode == HTTP_CODE_OK)
     {
         String base64State = http.getString();
 
@@ -477,7 +479,7 @@ getStateResult getLatestStateFromOpenHAB(bool SynchronizeWithNTP)
         return ServerIssue;
     }
     http.end();
-    
+
     return Success;
 }
 
@@ -516,10 +518,10 @@ void DrawFullUpdateElements()
     {
         auto today = (*days)[0];
         DisplayTodayForecast(
-            SCREEN_WIDTH / 2, 50, 
-            today->conditionCode(), 
+            SCREEN_WIDTH / 2, 50,
+            today->conditionCode(),
             today->maxTemperature(),
-            today->minTemperature(), 
+            today->minTemperature(),
             today->rain() + today->showers(),
             today->dominantWindDirection(),
             today->maxWindSpeed(),
@@ -554,11 +556,11 @@ void DrawFullUpdateElements()
         }
 
         DisplayNextDayForecast(
-            daysMargin + (day - 1) * ((SCREEN_WIDTH - daysMargin * 2) / (maxForecastDays - 2)), 
-            forecastY, 
-            (dayOfWeek + day) % 7, 
+            daysMargin + (day - 1) * ((SCREEN_WIDTH - daysMargin * 2) / (maxForecastDays - 2)),
+            forecastY,
+            (dayOfWeek + day) % 7,
             conditionCode,
-            maxTemperature, 
+            maxTemperature,
             minTemperature,
             maxWindSpeed
         );
