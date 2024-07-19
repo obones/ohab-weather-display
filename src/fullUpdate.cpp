@@ -80,7 +80,7 @@ String WindDegToOrdinalDirection(float windDirection)
 void DisplayWindSection(int x, int y, float angle, float windSpeed, String windSpeedUnit)
 {
     arrow(x, y, 0, angle, 18, 33); // Show wind direction on outer circle of width and length
-    drawCircle(x, y, 22, Black);
+    drawCircle(x, y, 23, Black);
     setFont(OpenSans16);
     drawString(x + 40, y - 12, WindDegToOrdinalDirection(angle), LEFT);
     setFont(OpenSans16);
