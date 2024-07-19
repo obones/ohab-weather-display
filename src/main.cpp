@@ -4,8 +4,8 @@
  * See the NOTICE file(s) distributed with this work for additional
  * information.
  *
- * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
- * If a copy of the MPL was not distributed with this file, 
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+ * If a copy of the MPL was not distributed with this file,
  * you can obtain one at https://mozilla.org/MPL/2.0/.
  *
  * SPDX-License-Identifier: MPL-2.0
@@ -33,7 +33,7 @@
 
 long StartTime       = 0;
 
-void BeginSleep(bool allowWakeUp) 
+void BeginSleep(bool allowWakeUp)
 {
     Serial.println("Awake for : " + String((millis() - StartTime) / 1000.0, 3) + "-secs");
     Serial.println("Starting deep-sleep period...");
@@ -52,25 +52,32 @@ void BeginSleep(bool allowWakeUp)
     esp_deep_sleep_start();  // Sleep until we have received a GPIO interrupt
 }
 
-void loop() 
+void loop()
 {
     // Nothing to do here because we go to deep sleep directly
 }
 
-void InitializeSystem() 
+void InitializeSerial()
+{
+    Serial.begin(115200);
+    while (!Serial);
+}
+
+void InitializeSystem()
 {
     // disable brownout, it triggers too easily when waking up from "GPIO" deep sleep
     WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);
 
     StartTime = millis();
-    Serial.begin(115200);
-    while (!Serial);
-    
-    Serial.println(String(__FILE__) + "\nStarting...");
+
     epd_init();
-    
+
     FrameBuffer = (uint8_t *)ps_calloc(sizeof(uint8_t), EPD_WIDTH * EPD_HEIGHT / 2);
-    if (!FrameBuffer) Serial.println("Full Screen Memory alloc failed!");
+    if (!FrameBuffer)
+    {
+        InitializeSerial();
+        Serial.println("Full Screen Memory alloc failed!");
+    }
     memset(FrameBuffer, 0xFF, EPD_WIDTH * EPD_HEIGHT / 2);
 
     if (!TimeManagement::Setup())
@@ -80,7 +87,7 @@ void InitializeSystem()
     }
 }
 
-void setup() 
+void setup()
 {
     InitializeSystem();
 
@@ -133,6 +140,8 @@ void setup()
 
             if (info.tm_min % 5 == 0)
             {
+                InitializeSerial();
+                Serial.println(String(__FILE__) + "\nStarting full update from deep sleep...");
                 DoFullUpdate((info.tm_hour == 4) && (info.tm_min < 2));
             }
             else
@@ -142,6 +151,9 @@ void setup()
         }
         else
         {
+            InitializeSerial();
+            Serial.println(String(__FILE__) + "\nStarting full update from reset...");
+
             TimeManagement::StartTimer();
             DoFullUpdate(true);
         }
