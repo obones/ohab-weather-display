@@ -77,41 +77,16 @@ String WindDegToOrdinalDirection(float windDirection)
     return "?";
 }
 
-void DisplayWindSection(int x, int y, float angle, float windSpeed, int compassRadius, String windSpeedUnit) 
+void DisplayWindSection(int x, int y, float angle, float windSpeed, String windSpeedUnit)
 {
-    arrow(x, y, compassRadius - 22, angle, 18, 33); // Show wind direction on outer circle of width and length
-    setFont(OpenSans8B);
-    int dxo, dyo, dxi, dyi;
-    drawCircle(x, y, compassRadius, Black);       // Draw compass circle
-    drawCircle(x, y, compassRadius + 1, Black);   // Draw compass circle
-    drawCircle(x, y, compassRadius * 0.7, Black); // Draw compass inner circle
-    for (float a = 0; a < 360; a = a + 22.5) {
-        dxo = compassRadius * cos((a - 90) * PI / 180);
-        dyo = compassRadius * sin((a - 90) * PI / 180);
-        if (a == 45)  drawString(dxo + x + 15, dyo + y - 18, Lang::TXT_NE, CENTER);
-        if (a == 135) drawString(dxo + x + 20, dyo + y - 2,  Lang::TXT_SE, CENTER);
-        if (a == 225) drawString(dxo + x - 20, dyo + y - 2,  Lang::TXT_SW, CENTER);
-        if (a == 315) drawString(dxo + x - 15, dyo + y - 18, Lang::TXT_NW, CENTER);
-        dxi = dxo * 0.9;
-        dyi = dyo * 0.9;
-        drawLine(dxo + x, dyo + y, dxi + x, dyi + y, Black);
-        dxo = dxo * 0.7;
-        dyo = dyo * 0.7;
-        dxi = dxo * 0.9;
-        dyi = dyo * 0.9;
-        drawLine(dxo + x, dyo + y, dxi + x, dyi + y, Black);
-    }
-    drawString(x, y - compassRadius - 20,     Lang::TXT_N, CENTER);
-    drawString(x, y + compassRadius + 10,     Lang::TXT_S, CENTER);
-    drawString(x - compassRadius - 15, y - 5, Lang::TXT_W, CENTER);
-    drawString(x + compassRadius + 10, y - 5, Lang::TXT_E, CENTER);
-    drawString(x + 3, y + 50, String(angle, 0) + "°", CENTER);
-    setFont(OpenSans12B);
-    drawString(x, y - 50, WindDegToOrdinalDirection(angle), CENTER);
-    setFont(OpenSans24B);
-    drawString(x, y - 18, String(windSpeed, 0), CENTER);
-    setFont(OpenSans12B);
-    drawString(x, y + 25, windSpeedUnit, CENTER);
+    arrow(x, y, 0, angle, 18, 33); // Show wind direction on outer circle of width and length
+    drawCircle(x, y, 22, Black);
+    setFont(OpenSans16);
+    drawString(x + 40, y - 12, WindDegToOrdinalDirection(angle), LEFT);
+    setFont(OpenSans16);
+    drawString(x + 155, y - 12, String(windSpeed, 0), RIGHT);
+    setFont(OpenSans8);
+    drawString(x + 160, y - 12 + 11, windSpeedUnit, LEFT);
 }
 
 const char* GetWeatherIcon(int conditionCode, bool isDay)
@@ -494,7 +469,7 @@ void DrawFullUpdateElements()
     String precipitationUnit = weather->precipitationUnit()->c_str();
 
     // current wind information
-    DisplayWindSection(137, 150, current->windDirection(), current->windSpeed(), 100, windSpeedUnit);
+    DisplayWindSection(40, 40, current->windDirection(), current->windSpeed(), windSpeedUnit);
 
     // current outdoor temperature
     setFont(OpenSans32);
