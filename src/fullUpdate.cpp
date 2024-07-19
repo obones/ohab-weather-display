@@ -507,8 +507,12 @@ void DrawFullUpdateElements()
     drawString(SCREEN_WIDTH - PARTIAL_AREA_MARGIN - 20, PARTIAL_AREA_Y + PARTIAL_AREA_HEIGHT + 90, "%", LEFT);
 
     // current full string date
+    String formattedDate = TimeManagement::GetFormattedDate();
+    int formattedDateOffset = 0;
+    if (formattedDate.indexOf("J") >= 0)
+        formattedDateOffset = 6;
     setFont(OpenSans16);
-    drawString(SCREEN_WIDTH / 2, 20, TimeManagement::GetFormattedDate(), CENTER);
+    drawString(SCREEN_WIDTH / 2, 18 - formattedDateOffset, formattedDate, CENTER);
 
     // forecast for today
     auto days = weather->days();
