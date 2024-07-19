@@ -279,14 +279,15 @@ void DisplayTodayForecast(
 
     DrawWeatherIcon(WeatherIcons64, OpenSans24B, x, y + textShiftY + textSpacing, conditionCode, true, maxWindSpeed, true);
 
+    setFont(OpenSans24);
+    drawString(x - textShiftX + textUnitSpacing, y + textShiftY, String(maxTemp, 0) + "°", RIGHT);
+    drawString(x - textShiftX + textUnitSpacing, y + textShiftY + textSpacing * 1.5, String(minTemp, 0) + "°", RIGHT);
     setFont(OpenSans16);
-    drawString(x - textShiftX, y + textShiftY, String(maxTemp, 0) + "°", RIGHT);
-    drawString(x - textShiftX, y + textShiftY + textSpacing, String(minTemp, 0) + "°", RIGHT);
-    drawString(x - textShiftX - textUnitLessSpacing, y + textShiftY + textSpacing * 2, String(precipitationSum, 0), RIGHT);
+    drawString(x - textShiftX - textUnitLessSpacing, y + textShiftY + textSpacing * 3, String(precipitationSum, 0), RIGHT);
     setFont(OpenSans8);
-    drawString(x - textShiftX - textUnitSpacing, y + textShiftY + textSpacing * 2 + 15, precipitationUnit, LEFT);
+    drawString(x - textShiftX - textUnitSpacing, y + textShiftY + textSpacing * 3 + 15, precipitationUnit, LEFT);
     setFont(OpenSans16);
-    drawString(x - textShiftX - textUnitLessSpacing, y + textShiftY + textSpacing * 3, WindDegToOrdinalDirection(windDirection), RIGHT);
+    drawString(x - 2.2 * textShiftX - textUnitLessSpacing, y + textShiftY + textSpacing * 4, WindDegToOrdinalDirection(windDirection), LEFT);
     drawString(x - textShiftX - textUnitLessSpacing, y + textShiftY + textSpacing * 4, String(maxWindSpeed, 0), RIGHT);
     setFont(OpenSans8);
     drawString(x - textShiftX - textUnitSpacing, y + textShiftY + textSpacing * 4 + 12, windSpeedUnit, LEFT);
