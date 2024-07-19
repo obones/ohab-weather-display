@@ -122,7 +122,7 @@ void setup()
         drawString(SCREEN_WIDTH / 2, 50, Lang::Status::LowBattery, CENTER);
 
         setFont(OpenSans18);
-        drawString(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, TimeManagement::GetFormattedTime(PCF_TIMEFORMAT_YYYY_MM_DD_HH_MM_SS), LEFT);
+        drawString(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 70, TimeManagement::GetFormattedTime(PCF_TIMEFORMAT_YYYY_MM_DD_HH_MM_SS), CENTER);
 
         epd_draw_grayscale_image(epd_full_screen(), FrameBuffer); // Update the screen
     }
