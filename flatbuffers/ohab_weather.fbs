@@ -7,6 +7,8 @@ table Weather
     alert: Alert;
     windSpeedUnit: string;
     precipitationUnit: string;
+    pastHour: PastWeather;
+    pastDay: PastWeather;
 }
 
 table CurrentWeather
@@ -35,6 +37,12 @@ table Alert
 {
     level: string;
     text: string;
+}
+
+table PastWeather
+{
+    maxWindSpeed: float;
+    precipitations: float;
 }
 
 root_type Weather;

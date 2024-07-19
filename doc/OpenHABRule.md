@@ -20,7 +20,7 @@ The flatc generated classes are directly pasted into the rule which gives the fo
           const windSpeedUnit = "km/h";
           const precipitationUnit = "mm";
           const temperatureUnit = "°C";
-          
+
           const currentOutdoorTemperatureItem = items.Cotech367959_zigbee2mqtt_Temperature;
           const currentWindDirectionItem = items.Cotech367959_zigbee2mqtt_Wind_direction;
           const currentWindGustItem = items.Cotech367959_zigbee2mqtt_Wind_gust;
@@ -35,20 +35,20 @@ The flatc generated classes are directly pasted into the rule which gives the fo
           const dailyRainItem = items.System_OpenMeteo_weather_forecast_Rain_Daily;
           const dailyShowersItem = items.System_OpenMeteo_weather_forecast_Showers_from_convective_precipitation_Daily;
           const dailySnowItem = items.System_OpenMeteo_weather_forecast_Snow_Daily;
-          
+
           const now = time.toZDT();
           const forecastStart = now.withHour(0).withMinute(0).withSecond(0);
           const forecastEnd = forecastStart.plusDays(6);
-          
+
           const dailyWMOCodeHistoricItems = dailyWMOCodeItem.history.getAllStatesBetween(forecastStart, forecastEnd);
           const dailyMinTemperatureHistoricItems = dailyMinTemperatureItem.history.getAllStatesBetween(forecastStart, forecastEnd);
           const dailyMaxTemperatureHistoricItems = dailyMaxTemperatureItem.history.getAllStatesBetween(forecastStart, forecastEnd);
           const dailyPrecipitationHistoricItems = dailyPrecipitationItem.history.getAllStatesBetween(forecastStart, forecastEnd);
           const dailyDominantWindDirectionHistoricItems = dailyDominantWindDirectionItem.history.getAllStatesBetween(forecastStart, forecastEnd);
-          const dailyWindSpeedHistoricItems = dailyWindSpeedItem.history.getAllStatesBetween(forecastStart, forecastEnd);          
-          const dailyRainHistoricItems = dailyRainItem.history.getAllStatesBetween(forecastStart, forecastEnd);          
-          const dailyShowersHistoricItems = dailyShowersItem.history.getAllStatesBetween(forecastStart, forecastEnd);          
-          const dailySnowHistoricItems = dailySnowItem.history.getAllStatesBetween(forecastStart, forecastEnd);          
+          const dailyWindSpeedHistoricItems = dailyWindSpeedItem.history.getAllStatesBetween(forecastStart, forecastEnd);
+          const dailyRainHistoricItems = dailyRainItem.history.getAllStatesBetween(forecastStart, forecastEnd);
+          const dailyShowersHistoricItems = dailyShowersItem.history.getAllStatesBetween(forecastStart, forecastEnd);
+          const dailySnowHistoricItems = dailySnowItem.history.getAllStatesBetween(forecastStart, forecastEnd);
 
           // Polyfill for TextEncoder/TextDecoder
           (function(e){function r(b){var a=b.charCodeAt(0),c=1114112,d=0,n=b.length|0,g="";switch(a>>>4){case 12:case 13:c=(a&31)<<6|b.charCodeAt(1)&63;d=128>c?0:2;break;case 14:c=(a&15)<<12|(b.charCodeAt(1)&63)<<6|b.charCodeAt(2)&63;d=2048>c?0:3;break;case 15:30===a>>>3&&(c=(a&7)<<18|(b.charCodeAt(1)&63)<<12|(b.charCodeAt(2)&63)<<6|b.charCodeAt(3),d=65536>c?0:4)}d&&(n<d?d=0:65536>c?g=f(c):1114112>c?(c=c-65664|0,g=f((c>>>10)+55296|0,(c&1023)+56320|0)):d=0);for(;d<n;d=d+1|0)g+="\ufffd";return g}function p(){}function t(b){var a=b.charCodeAt(0)|0;if(55296<=a&&56319>=a)if(b=b.charCodeAt(1)|0,56320<=b&&57343>=b){if(a=(a<<10)+b-56613888|0,65535<a)return f(240|a>>>18,128|a>>>12&63,128|a>>>6&63,128|a&63)}else a=65533;return 2047>=a?f(192|a>>>6,128|a&63):f(224|a>>>12,128|a>>>6&63,128|a&63)}function q(){}var f=String.fromCharCode,l={}.toString,h=e.SharedArrayBuffer,u=h?l.call(h):"",k=e.Uint8Array,m=k||Array,v=l.call((k?ArrayBuffer:m).prototype);h=q.prototype;var w=e.TextEncoder;p.prototype.decode=function(b){var a=b&&b.buffer||b,c=l.call(a);if(c!==v&&c!==u&&void 0!==b)throw TypeError("Failed to execute 'decode' on 'TextDecoder': The provided value is not of type '(ArrayBuffer or ArrayBufferView)'");b=k?new m(a):a;a="";c=0;for(var d=b.length|0;c<d;c=c+32768|0)a+=f.apply(0,b[k?"subarray":"slice"](c,c+32768|0));return a.replace(/[\xc0-\xff][\x80-\xbf]+|[\x80-\xff]/g,r)};e.TextDecoder||(e.TextDecoder=p);h.encode=function(b){b=void 0===b?"":(""+b).replace(/[\x80-\uD7ff\uDC00-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]?/g,t);for(var a=b.length|0,c=new m(a),d=0;d<a;d=d+1|0)c[d]=b.charCodeAt(d);return c};w||(e.TextEncoder=q)})(""+void 0==typeof global?""+void 0==typeof self?this:self:global);//AnonyCo//# sourceMappingURL=https://cdn.jsdelivr.net/gh/AnonyCo/FastestSmallestTextEncoderDecoder/EncoderDecoderTogether.min.js.map
@@ -238,7 +238,7 @@ The flatc generated classes are directly pasted into the rule which gives the fo
                   return Forecast.endForecast(builder);
               }
           }
-          
+
           // Flatbuffer generated Alert class
           class Alert {
               constructor() {
@@ -285,7 +285,54 @@ The flatc generated classes are directly pasted into the rule which gives the fo
                   return Alert.endAlert(builder);
               }
           }
-          
+
+          // Flatbuffer generated PastWeather class
+          class PastWeather {
+              constructor() {
+                  this.bb = null;
+                  this.bb_pos = 0;
+              }
+              __init(i, bb) {
+                  this.bb_pos = i;
+                  this.bb = bb;
+                  return this;
+              }
+              static getRootAsPastWeather(bb, obj) {
+                  return (obj || new PastWeather()).__init(bb.readInt32(bb.position()) + bb.position(), bb);
+              }
+              static getSizePrefixedRootAsPastWeather(bb, obj) {
+                  bb.setPosition(bb.position() + flatbuffers.SIZE_PREFIX_LENGTH);
+                  return (obj || new PastWeather()).__init(bb.readInt32(bb.position()) + bb.position(), bb);
+              }
+              maxWindSpeed() {
+                  const offset = this.bb.__offset(this.bb_pos, 4);
+                  return offset ? this.bb.readFloat32(this.bb_pos + offset) : 0.0;
+              }
+              precipitations() {
+                  const offset = this.bb.__offset(this.bb_pos, 6);
+                  return offset ? this.bb.readFloat32(this.bb_pos + offset) : 0.0;
+              }
+              static startPastWeather(builder) {
+                  builder.startObject(2);
+              }
+              static addMaxWindSpeed(builder, maxWindSpeed) {
+                  builder.addFieldFloat32(0, maxWindSpeed, 0.0);
+              }
+              static addPrecipitations(builder, precipitations) {
+                  builder.addFieldFloat32(1, precipitations, 0.0);
+              }
+              static endPastWeather(builder) {
+                  const offset = builder.endObject();
+                  return offset;
+              }
+              static createPastWeather(builder, maxWindSpeed, precipitations) {
+                  PastWeather.startPastWeather(builder);
+                  PastWeather.addMaxWindSpeed(builder, maxWindSpeed);
+                  PastWeather.addPrecipitations(builder, precipitations);
+                  return PastWeather.endPastWeather(builder);
+              }
+          }
+
           // Flatbuffer generated Weather class
           class Weather {
               constructor() {
@@ -328,8 +375,16 @@ The flatc generated classes are directly pasted into the rule which gives the fo
                   const offset = this.bb.__offset(this.bb_pos, 12);
                   return offset ? this.bb.__string(this.bb_pos + offset, optionalEncoding) : null;
               }
+              pastHour(obj) {
+                  const offset = this.bb.__offset(this.bb_pos, 14);
+                  return offset ? (obj || new PastWeather()).__init(this.bb.__indirect(this.bb_pos + offset), this.bb) : null;
+              }
+              pastDay(obj) {
+                  const offset = this.bb.__offset(this.bb_pos, 16);
+                  return offset ? (obj || new PastWeather()).__init(this.bb.__indirect(this.bb_pos + offset), this.bb) : null;
+              }
               static startWeather(builder) {
-                  builder.startObject(5);
+                  builder.startObject(7);
               }
               static addCurrent(builder, currentOffset) {
                   builder.addFieldOffset(0, currentOffset, 0);
@@ -356,6 +411,12 @@ The flatc generated classes are directly pasted into the rule which gives the fo
               static addPrecipitationUnit(builder, precipitationUnitOffset) {
                   builder.addFieldOffset(4, precipitationUnitOffset, 0);
               }
+              static addPastHour(builder, pastHourOffset) {
+                  builder.addFieldOffset(5, pastHourOffset, 0);
+              }
+              static addPastDay(builder, pastDayOffset) {
+                  builder.addFieldOffset(6, pastDayOffset, 0);
+              }
               static endWeather(builder) {
                   const offset = builder.endObject();
                   return offset;
@@ -376,18 +437,18 @@ The flatc generated classes are directly pasted into the rule which gives the fo
 
           let builder = new flatbuffers.Builder(1024);
 
-          let currentWeather = 
-            CurrentWeather.createCurrentWeather(builder, 
-              currentOutdoorTemperatureItem.numericState, 
-              currentWindDirectionItem.numericState, 
+          let currentWeather =
+            CurrentWeather.createCurrentWeather(builder,
+              currentOutdoorTemperatureItem.numericState,
+              currentWindDirectionItem.numericState,
               currentWindGustItem.numericState,
-              currentRelativeHumidityItem.numericState, 
+              currentRelativeHumidityItem.numericState,
               ((moonPhaseItem.numericState / 100) + .5) % 1
             );
-            
+
           let windSpeedUnitOffset = builder.createString(windSpeedUnit);
           let precipitationUnitOffset = builder.createString(precipitationUnit);
-          
+
           function getNumericValue(historicItems, forecastIndex, unit)
           {
             const historicItem = historicItems[forecastIndex];
@@ -404,10 +465,10 @@ The flatc generated classes are directly pasted into the rule which gives the fo
                 return historicItem.numericState;
               }
             }
-            
+
             return NaN;
           }
-          
+
           let daysData = [];
           for (let forecastIndex = 0; forecastIndex < dailyWMOCodeHistoricItems.length; forecastIndex++)
           {
@@ -420,7 +481,7 @@ The flatc generated classes are directly pasted into the rule which gives the fo
             const snow = getNumericValue(dailySnowHistoricItems, forecastIndex, precipitationUnit);
             const rain = getNumericValue(dailyRainHistoricItems, forecastIndex, precipitationUnit);
             const showers = getNumericValue(dailyShowersHistoricItems, forecastIndex, precipitationUnit);
-          
+
             daysData.push(
               Forecast.createForecast(builder, minTemperature, maxTemperature, maxWindSpeed, dominantWindDirection, conditionCode, cloudiness, snow, rain, showers)
             );
@@ -433,7 +494,7 @@ The flatc generated classes are directly pasted into the rule which gives the fo
           // Weather.addAlerts(builder, alerts);
           Weather.addWindSpeedUnit(builder, windSpeedUnitOffset);
           Weather.addPrecipitationUnit(builder, precipitationUnitOffset);
-          
+
           let weather = Weather.endWeather(builder);
           builder.finish(weather);
 

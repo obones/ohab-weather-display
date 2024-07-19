@@ -403,6 +403,46 @@ void DrawAlert(int x, int y, String level, String text)
     drawString(x, y + currentFont.advance_y, text, CENTER);
 }
 
+void DrawPastConditionRow(int rainCellX, int windCellX, int y, float precipitations, float maxWindSpeed,
+    String precipitationUnit, String windSpeedUnit)
+{
+    const int textUnitLessSpacing = 5;
+
+    setFont(OpenSans12);
+    drawString(rainCellX - textUnitLessSpacing, y, String(precipitations, 0), RIGHT);
+    drawString(windCellX - textUnitLessSpacing, y, String(maxWindSpeed, 0), RIGHT);
+
+    setFont(OpenSans6);
+    drawString(rainCellX, y + 11, precipitationUnit, LEFT);
+    drawString(windCellX, y + 8, windSpeedUnit, LEFT);
+}
+
+void DrawPastConditions(int x, int y, const ohab_weather::PastWeather *pastHour, const ohab_weather::PastWeather *pastDay,
+    String precipitationUnit, String windSpeedUnit)
+{
+    const int cellHeight = 40;
+    const int firstColumnWidth = 45;
+    const int firstColumnMargin = 0;
+    const int valueColumnWidth = 85;
+    const int valueColumnMargin = 10;
+
+    setFont(OpenSans12);
+    drawString(x + firstColumnWidth + 1 * valueColumnWidth, y, Lang::Rain, RIGHT);
+    drawString(x + firstColumnWidth + 2 * valueColumnWidth, y, Lang::Wind, RIGHT);
+
+    drawString(x + firstColumnWidth - firstColumnMargin, y + cellHeight, "1h", RIGHT);
+    drawString(x + firstColumnWidth - firstColumnMargin, y + 2 * cellHeight, "24h", RIGHT);
+
+    const int rainCellX = x + firstColumnWidth + valueColumnWidth - valueColumnMargin;
+    const int windCellX = x + firstColumnWidth + 2 * valueColumnWidth - valueColumnMargin;
+
+    if (pastHour)
+        DrawPastConditionRow(rainCellX, windCellX, y + cellHeight, pastHour->precipitations(), pastHour->maxWindSpeed(), precipitationUnit, windSpeedUnit);
+
+    if (pastDay)
+        DrawPastConditionRow(rainCellX, windCellX, y + 2 * cellHeight, pastDay->precipitations(), pastDay->maxWindSpeed(), precipitationUnit, windSpeedUnit);
+}
+
 void StopWiFi()
 {
     WiFi.disconnect();
@@ -469,8 +509,11 @@ void DrawFullUpdateElements()
     String windSpeedUnit = weather->windSpeedUnit()->c_str();
     String precipitationUnit = weather->precipitationUnit()->c_str();
 
+    const int windSectionX = 40;
+    const int windSectionY = 40;
+
     // current wind information
-    DisplayWindSection(40, 40, current->windDirection(), current->windSpeed(), windSpeedUnit);
+    DisplayWindSection(windSectionX, windSectionY, current->windDirection(), current->windSpeed(), windSpeedUnit);
 
     // current outdoor temperature
     setFont(OpenSans32);
@@ -563,6 +606,9 @@ void DrawFullUpdateElements()
     auto alert = weather->alert();
     if (alert)
         DrawAlert(SCREEN_WIDTH / 2 + 180, PARTIAL_AREA_Y + PARTIAL_AREA_HEIGHT - PARTIAL_AREA_MARGIN, alert->level()->c_str(), alert->text()->c_str());
+
+    // past conditions
+    DrawPastConditions(15, windSectionY + 60, weather->pastHour(), weather->pastDay(), precipitationUnit, windSpeedUnit);
 }
 
 void DoFullUpdate(bool SynchronizeWithNTP)

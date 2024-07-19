@@ -4,8 +4,8 @@
  * See the NOTICE file(s) distributed with this work for additional
  * information.
  *
- * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
- * If a copy of the MPL was not distributed with this file, 
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+ * If a copy of the MPL was not distributed with this file,
  * you can obtain one at https://mozilla.org/MPL/2.0/.
  *
  * SPDX-License-Identifier: MPL-2.0
@@ -56,6 +56,9 @@ namespace Lang
         const char* FailedOpenHAB = "Failed to communicate\nwith OpenHAB server!";
         const char* RTCError = "Cannot setup RTC";
     }
+
+    const char* Rain = "Rain";
+    const char* Wind = "Wind";
 }
 
 #endif

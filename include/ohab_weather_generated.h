@@ -27,6 +27,9 @@ struct ForecastBuilder;
 struct Alert;
 struct AlertBuilder;
 
+struct PastWeather;
+struct PastWeatherBuilder;
+
 struct Weather FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
   typedef WeatherBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
@@ -34,7 +37,9 @@ struct Weather FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
     VT_DAYS = 6,
     VT_ALERT = 8,
     VT_WINDSPEEDUNIT = 10,
-    VT_PRECIPITATIONUNIT = 12
+    VT_PRECIPITATIONUNIT = 12,
+    VT_PASTHOUR = 14,
+    VT_PASTDAY = 16
   };
   const ohab_weather::CurrentWeather *current() const {
     return GetPointer<const ohab_weather::CurrentWeather *>(VT_CURRENT);
@@ -51,6 +56,12 @@ struct Weather FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
   const ::flatbuffers::String *precipitationUnit() const {
     return GetPointer<const ::flatbuffers::String *>(VT_PRECIPITATIONUNIT);
   }
+  const ohab_weather::PastWeather *pastHour() const {
+    return GetPointer<const ohab_weather::PastWeather *>(VT_PASTHOUR);
+  }
+  const ohab_weather::PastWeather *pastDay() const {
+    return GetPointer<const ohab_weather::PastWeather *>(VT_PASTDAY);
+  }
   bool Verify(::flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyOffset(verifier, VT_CURRENT) &&
@@ -64,6 +75,10 @@ struct Weather FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
            verifier.VerifyString(windSpeedUnit()) &&
            VerifyOffset(verifier, VT_PRECIPITATIONUNIT) &&
            verifier.VerifyString(precipitationUnit()) &&
+           VerifyOffset(verifier, VT_PASTHOUR) &&
+           verifier.VerifyTable(pastHour()) &&
+           VerifyOffset(verifier, VT_PASTDAY) &&
+           verifier.VerifyTable(pastDay()) &&
            verifier.EndTable();
   }
 };
@@ -87,6 +102,12 @@ struct WeatherBuilder {
   void add_precipitationUnit(::flatbuffers::Offset<::flatbuffers::String> precipitationUnit) {
     fbb_.AddOffset(Weather::VT_PRECIPITATIONUNIT, precipitationUnit);
   }
+  void add_pastHour(::flatbuffers::Offset<ohab_weather::PastWeather> pastHour) {
+    fbb_.AddOffset(Weather::VT_PASTHOUR, pastHour);
+  }
+  void add_pastDay(::flatbuffers::Offset<ohab_weather::PastWeather> pastDay) {
+    fbb_.AddOffset(Weather::VT_PASTDAY, pastDay);
+  }
   explicit WeatherBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
@@ -104,8 +125,12 @@ inline ::flatbuffers::Offset<Weather> CreateWeather(
     ::flatbuffers::Offset<::flatbuffers::Vector<::flatbuffers::Offset<ohab_weather::Forecast>>> days = 0,
     ::flatbuffers::Offset<ohab_weather::Alert> alert = 0,
     ::flatbuffers::Offset<::flatbuffers::String> windSpeedUnit = 0,
-    ::flatbuffers::Offset<::flatbuffers::String> precipitationUnit = 0) {
+    ::flatbuffers::Offset<::flatbuffers::String> precipitationUnit = 0,
+    ::flatbuffers::Offset<ohab_weather::PastWeather> pastHour = 0,
+    ::flatbuffers::Offset<ohab_weather::PastWeather> pastDay = 0) {
   WeatherBuilder builder_(_fbb);
+  builder_.add_pastDay(pastDay);
+  builder_.add_pastHour(pastHour);
   builder_.add_precipitationUnit(precipitationUnit);
   builder_.add_windSpeedUnit(windSpeedUnit);
   builder_.add_alert(alert);
@@ -120,7 +145,9 @@ inline ::flatbuffers::Offset<Weather> CreateWeatherDirect(
     const std::vector<::flatbuffers::Offset<ohab_weather::Forecast>> *days = nullptr,
     ::flatbuffers::Offset<ohab_weather::Alert> alert = 0,
     const char *windSpeedUnit = nullptr,
-    const char *precipitationUnit = nullptr) {
+    const char *precipitationUnit = nullptr,
+    ::flatbuffers::Offset<ohab_weather::PastWeather> pastHour = 0,
+    ::flatbuffers::Offset<ohab_weather::PastWeather> pastDay = 0) {
   auto days__ = days ? _fbb.CreateVector<::flatbuffers::Offset<ohab_weather::Forecast>>(*days) : 0;
   auto windSpeedUnit__ = windSpeedUnit ? _fbb.CreateString(windSpeedUnit) : 0;
   auto precipitationUnit__ = precipitationUnit ? _fbb.CreateString(precipitationUnit) : 0;
@@ -130,7 +157,9 @@ inline ::flatbuffers::Offset<Weather> CreateWeatherDirect(
       days__,
       alert,
       windSpeedUnit__,
-      precipitationUnit__);
+      precipitationUnit__,
+      pastHour,
+      pastDay);
 }
 
 struct CurrentWeather FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
@@ -398,6 +427,57 @@ inline ::flatbuffers::Offset<Alert> CreateAlertDirect(
       _fbb,
       level__,
       text__);
+}
+
+struct PastWeather FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
+  typedef PastWeatherBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_MAXWINDSPEED = 4,
+    VT_PRECIPITATIONS = 6
+  };
+  float maxWindSpeed() const {
+    return GetField<float>(VT_MAXWINDSPEED, 0.0f);
+  }
+  float precipitations() const {
+    return GetField<float>(VT_PRECIPITATIONS, 0.0f);
+  }
+  bool Verify(::flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<float>(verifier, VT_MAXWINDSPEED, 4) &&
+           VerifyField<float>(verifier, VT_PRECIPITATIONS, 4) &&
+           verifier.EndTable();
+  }
+};
+
+struct PastWeatherBuilder {
+  typedef PastWeather Table;
+  ::flatbuffers::FlatBufferBuilder &fbb_;
+  ::flatbuffers::uoffset_t start_;
+  void add_maxWindSpeed(float maxWindSpeed) {
+    fbb_.AddElement<float>(PastWeather::VT_MAXWINDSPEED, maxWindSpeed, 0.0f);
+  }
+  void add_precipitations(float precipitations) {
+    fbb_.AddElement<float>(PastWeather::VT_PRECIPITATIONS, precipitations, 0.0f);
+  }
+  explicit PastWeatherBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  ::flatbuffers::Offset<PastWeather> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = ::flatbuffers::Offset<PastWeather>(end);
+    return o;
+  }
+};
+
+inline ::flatbuffers::Offset<PastWeather> CreatePastWeather(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    float maxWindSpeed = 0.0f,
+    float precipitations = 0.0f) {
+  PastWeatherBuilder builder_(_fbb);
+  builder_.add_precipitations(precipitations);
+  builder_.add_maxWindSpeed(maxWindSpeed);
+  return builder_.Finish();
 }
 
 inline const ohab_weather::Weather *GetWeather(const void *buf) {
