@@ -296,7 +296,7 @@ void DisplayTodayForecast(
 void DisplayNextDayForecast(int x, int y, int dayOfWeek, int conditionCode, float maxTemp, float minTemp, float maxWindSpeed)
 {
     const int textShiftX = 60;
-    const int textShiftY = 160;
+    const int textShiftY = 155;
 
     setFont(OpenSans14);
     int weekDayNameShiftY = 30;
@@ -307,9 +307,9 @@ void DisplayNextDayForecast(int x, int y, int dayOfWeek, int conditionCode, floa
 
     DrawWeatherIcon(WeatherIcons48, OpenSans14B, x, y, conditionCode, true, maxWindSpeed, false);
 
-    setFont(OpenSans14);
+    setFont(OpenSans16);
     drawString(x - textShiftX, y + textShiftY, String(minTemp, 0) + "°", LEFT);
-    drawString(x + textShiftX + 10, y + textShiftY, String(maxTemp, 0) + "°", RIGHT);
+    drawString(x + textShiftX + 20, y + textShiftY, String(maxTemp, 0) + "°", RIGHT);
 }
 
 uint8_t StartWiFi()
