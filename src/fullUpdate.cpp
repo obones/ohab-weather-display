@@ -287,8 +287,7 @@ void DisplayTodayForecast(
     setFont(OpenSans8);
     drawString(x - textShiftX - textUnitSpacing, y + textShiftY + textSpacing * 3 + 15, precipitationUnit, LEFT);
     setFont(OpenSans16);
-    drawString(x - 2.2 * textShiftX - textUnitLessSpacing, y + textShiftY + textSpacing * 4, WindDegToOrdinalDirection(windDirection), LEFT);
-    drawString(x - textShiftX - textUnitLessSpacing, y + textShiftY + textSpacing * 4, String(maxWindSpeed, 0), RIGHT);
+    drawString(x - textShiftX - textUnitLessSpacing, y + textShiftY + textSpacing * 4, WindDegToOrdinalDirection(windDirection) + "   " + String(maxWindSpeed, 0), RIGHT);
     setFont(OpenSans8);
     drawString(x - textShiftX - textUnitSpacing, y + textShiftY + textSpacing * 4 + 12, windSpeedUnit, LEFT);
 }
