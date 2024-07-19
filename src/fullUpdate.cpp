@@ -307,7 +307,7 @@ void DisplayNextDayForecast(int x, int y, int dayOfWeek, int conditionCode, floa
 
     DrawWeatherIcon(WeatherIcons48, OpenSans14B, x, y, conditionCode, true, maxWindSpeed, false);
 
-    setFont(OpenSans16);
+    setFont(OpenSans18);
     drawString(x - textShiftX, y + textShiftY, String(minTemp, 0) + "°", LEFT);
     drawString(x + textShiftX, y + textShiftY, String(maxTemp, 0) + "°", RIGHT);
 }
