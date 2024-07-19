@@ -25,6 +25,7 @@ The flatc generated classes are directly pasted into the rule which gives the fo
           const currentWindDirectionItem = items.Cotech367959_zigbee2mqtt_Wind_direction;
           const currentWindGustItem = items.Cotech367959_zigbee2mqtt_Wind_gust;
           const currentRelativeHumidityItem = items.Cotech367959_zigbee2mqtt_Humidity;
+          const rain_cumulative = items.Cotech367959_zigbee2mqtt_Rain_amount_cumulative;
           const moonPhaseItem = items.Local_Moon_Phase_AgePercent;
           const dailyWMOCodeItem = items.weather_forecast_WMO_code_Daily;
           const dailyMinTemperatureItem = items.weather_forecast_Minimum_outdoor_temperature_Daily;
@@ -449,9 +450,8 @@ The flatc generated classes are directly pasted into the rule which gives the fo
           let windSpeedUnitOffset = builder.createString(windSpeedUnit);
           let precipitationUnitOffset = builder.createString(precipitationUnit);
 
-          function getNumericValue(historicItems, forecastIndex, unit)
+          function getHistoricItemNumericValue(historicItem, unit)
           {
-            const historicItem = historicItems[forecastIndex];
             if (historicItem)
             {
               const quantityState = historicItem.quantityState;
@@ -467,6 +467,13 @@ The flatc generated classes are directly pasted into the rule which gives the fo
             }
 
             return NaN;
+          }
+
+          function getNumericValue(historicItems, forecastIndex, unit)
+          {
+            const historicItem = historicItems[forecastIndex];
+
+            return getHistoricItemNumericValue(historicItem, unit);
           }
 
           let daysData = [];
@@ -488,12 +495,25 @@ The flatc generated classes are directly pasted into the rule which gives the fo
           }
           const days = Weather.createDaysVector(builder, daysData);
 
+          function getPastWeather(pastTime)
+          {
+            const rain = rain_cumulative.history.evolutionRateSince(pastTime);
+            const maxWindSpeed = getHistoricItemNumericValue(currentWindGustItem.history.maximumSince(pastTime), windSpeedUnit);
+
+            return PastWeather.createPastWeather(builder, maxWindSpeed, rain);
+          }
+
+          const pastHour = getPastWeather(now.minusHours(1));
+          const pastDay = getPastWeather(now.minusHours(24));
+
           Weather.startWeather(builder);
           Weather.addCurrent(builder, currentWeather);
           Weather.addDays(builder, days);
           // Weather.addAlerts(builder, alerts);
           Weather.addWindSpeedUnit(builder, windSpeedUnitOffset);
           Weather.addPrecipitationUnit(builder, precipitationUnitOffset);
+          Weather.addPastHour(builder, pastHour);
+          Weather.addPastDay(builder, pastDay);
 
           let weather = Weather.endWeather(builder);
           builder.finish(weather);
