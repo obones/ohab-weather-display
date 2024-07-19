@@ -487,8 +487,8 @@ void DrawFullUpdateElements()
     int formattedDateOffset = 0;
     if (formattedDate.indexOf("J") >= 0)
         formattedDateOffset = 6;
-    setFont(OpenSans16);
-    drawString(SCREEN_WIDTH / 2, 18 - formattedDateOffset, formattedDate, CENTER);
+    setFont(OpenSans18);
+    drawString(SCREEN_WIDTH / 2, 12 - formattedDateOffset, formattedDate, CENTER);
 
     // forecast for today
     auto days = weather->days();
