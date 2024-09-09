@@ -10,6 +10,7 @@
  *
  * SPDX-License-Identifier: MPL-2.0
  */
+// cSpell:dictionaries
 #include "lang.h"
 
 #ifdef USE_LANG_FR
@@ -42,7 +43,7 @@ namespace Lang
 
     //Month
     const char* month_b[] = { "Jan", "Fév", "Mar", "Avr", "Mai", "Jun", "Jul", "Aou", "Sep", "Oct", "Nov", "Déc" };
-    const char* month_B[] = { "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septpembre", "Octobre", "Novembre", "Décembre" };
+    const char* month_B[] = { "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre" };
 
     // with printf replacements, 1 is string for day of week, 2 is day in month as a number, 3 is month name
     const char* FormattedDateFormat = "%1$s %2$d %3$s";
