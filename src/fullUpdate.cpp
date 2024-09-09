@@ -500,8 +500,6 @@ getStateResult getLatestStateFromOpenHAB(bool SynchronizeWithNTP)
 
 void DrawFullUpdateElements()
 {
-    DrawPartialUpdateElements();
-
     const ohab_weather::Weather* weather = ohab_weather::GetWeather(currentState);
     const ohab_weather::CurrentWeather* current = weather->current();
 
@@ -524,14 +522,6 @@ void DrawFullUpdateElements()
     setFont(OpenSans12);
     drawString(SCREEN_WIDTH - PARTIAL_AREA_MARGIN - 20, PARTIAL_AREA_Y + PARTIAL_AREA_HEIGHT + 90, "%", LEFT);
 
-    // current full string date
-    String formattedDate = TimeManagement::GetFormattedDate();
-    int formattedDateOffset = 0;
-    if (formattedDate.indexOf("J") >= 0)
-        formattedDateOffset = 6;
-    setFont(OpenSans18);
-    drawString(SCREEN_WIDTH / 2, 12 - formattedDateOffset, formattedDate, CENTER);
-
     // forecast for today
     auto days = weather->days();
     const int forecastDays = (days) ? days->size() : 0;
@@ -540,7 +530,7 @@ void DrawFullUpdateElements()
     {
         auto today = (*days)[0];
         DisplayTodayForecast(
-            SCREEN_WIDTH / 2, 50,
+            SCREEN_WIDTH / 2, 60,
             today->conditionCode(),
             today->maxTemperature(),
             today->minTemperature(),
@@ -552,7 +542,7 @@ void DrawFullUpdateElements()
     }
     else
     {
-        DisplayTodayForecast(SCREEN_WIDTH / 2, 50, 255, NAN, NAN, NAN, NAN, NAN, precipitationUnit, windSpeedUnit);
+        DisplayTodayForecast(SCREEN_WIDTH / 2, 60, 255, NAN, NAN, NAN, NAN, NAN, precipitationUnit, windSpeedUnit);
     }
 
     // forecast for next days
@@ -608,6 +598,9 @@ void DrawFullUpdateElements()
 
     // past conditions
     DrawPastConditions(15, windSectionY + 60, weather->pastHour(), weather->pastDay(), precipitationUnit, windSpeedUnit);
+
+    // time/date/battery
+    DrawPartialUpdateElements();
 }
 
 void DoFullUpdate(bool SynchronizeWithNTP)
