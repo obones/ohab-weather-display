@@ -40,16 +40,17 @@ The flatc generated classes are directly pasted into the rule which gives the fo
           const now = time.toZDT();
           const forecastStart = now.withHour(0).withMinute(0).withSecond(0);
           const forecastEnd = forecastStart.plusDays(6);
+          const currentConditionsExpectedLastUpdate = now.minusHours(5);
 
-          const dailyWMOCodeHistoricItems = dailyWMOCodeItem.history.getAllStatesBetween(forecastStart, forecastEnd);
-          const dailyMinTemperatureHistoricItems = dailyMinTemperatureItem.history.getAllStatesBetween(forecastStart, forecastEnd);
-          const dailyMaxTemperatureHistoricItems = dailyMaxTemperatureItem.history.getAllStatesBetween(forecastStart, forecastEnd);
-          const dailyPrecipitationHistoricItems = dailyPrecipitationItem.history.getAllStatesBetween(forecastStart, forecastEnd);
-          const dailyDominantWindDirectionHistoricItems = dailyDominantWindDirectionItem.history.getAllStatesBetween(forecastStart, forecastEnd);
-          const dailyWindSpeedHistoricItems = dailyWindSpeedItem.history.getAllStatesBetween(forecastStart, forecastEnd);
-          const dailyRainHistoricItems = dailyRainItem.history.getAllStatesBetween(forecastStart, forecastEnd);
-          const dailyShowersHistoricItems = dailyShowersItem.history.getAllStatesBetween(forecastStart, forecastEnd);
-          const dailySnowHistoricItems = dailySnowItem.history.getAllStatesBetween(forecastStart, forecastEnd);
+          const dailyWMOCodeHistoricItems = dailyWMOCodeItem.persistence.getAllStatesBetween(forecastStart, forecastEnd);
+          const dailyMinTemperatureHistoricItems = dailyMinTemperatureItem.persistence.getAllStatesBetween(forecastStart, forecastEnd);
+          const dailyMaxTemperatureHistoricItems = dailyMaxTemperatureItem.persistence.getAllStatesBetween(forecastStart, forecastEnd);
+          const dailyPrecipitationHistoricItems = dailyPrecipitationItem.persistence.getAllStatesBetween(forecastStart, forecastEnd);
+          const dailyDominantWindDirectionHistoricItems = dailyDominantWindDirectionItem.persistence.getAllStatesBetween(forecastStart, forecastEnd);
+          const dailyWindSpeedHistoricItems = dailyWindSpeedItem.persistence.getAllStatesBetween(forecastStart, forecastEnd);          
+          const dailyRainHistoricItems = dailyRainItem.persistence.getAllStatesBetween(forecastStart, forecastEnd);          
+          const dailyShowersHistoricItems = dailyShowersItem.persistence.getAllStatesBetween(forecastStart, forecastEnd);          
+          const dailySnowHistoricItems = dailySnowItem.persistence.getAllStatesBetween(forecastStart, forecastEnd);          
 
           // Polyfill for TextEncoder/TextDecoder
           (function(e){function r(b){var a=b.charCodeAt(0),c=1114112,d=0,n=b.length|0,g="";switch(a>>>4){case 12:case 13:c=(a&31)<<6|b.charCodeAt(1)&63;d=128>c?0:2;break;case 14:c=(a&15)<<12|(b.charCodeAt(1)&63)<<6|b.charCodeAt(2)&63;d=2048>c?0:3;break;case 15:30===a>>>3&&(c=(a&7)<<18|(b.charCodeAt(1)&63)<<12|(b.charCodeAt(2)&63)<<6|b.charCodeAt(3),d=65536>c?0:4)}d&&(n<d?d=0:65536>c?g=f(c):1114112>c?(c=c-65664|0,g=f((c>>>10)+55296|0,(c&1023)+56320|0)):d=0);for(;d<n;d=d+1|0)g+="\ufffd";return g}function p(){}function t(b){var a=b.charCodeAt(0)|0;if(55296<=a&&56319>=a)if(b=b.charCodeAt(1)|0,56320<=b&&57343>=b){if(a=(a<<10)+b-56613888|0,65535<a)return f(240|a>>>18,128|a>>>12&63,128|a>>>6&63,128|a&63)}else a=65533;return 2047>=a?f(192|a>>>6,128|a&63):f(224|a>>>12,128|a>>>6&63,128|a&63)}function q(){}var f=String.fromCharCode,l={}.toString,h=e.SharedArrayBuffer,u=h?l.call(h):"",k=e.Uint8Array,m=k||Array,v=l.call((k?ArrayBuffer:m).prototype);h=q.prototype;var w=e.TextEncoder;p.prototype.decode=function(b){var a=b&&b.buffer||b,c=l.call(a);if(c!==v&&c!==u&&void 0!==b)throw TypeError("Failed to execute 'decode' on 'TextDecoder': The provided value is not of type '(ArrayBuffer or ArrayBufferView)'");b=k?new m(a):a;a="";c=0;for(var d=b.length|0;c<d;c=c+32768|0)a+=f.apply(0,b[k?"subarray":"slice"](c,c+32768|0));return a.replace(/[\xc0-\xff][\x80-\xbf]+|[\x80-\xff]/g,r)};e.TextDecoder||(e.TextDecoder=p);h.encode=function(b){b=void 0===b?"":(""+b).replace(/[\x80-\uD7ff\uDC00-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]?/g,t);for(var a=b.length|0,c=new m(a),d=0;d<a;d=d+1|0)c[d]=b.charCodeAt(d);return c};w||(e.TextEncoder=q)})(""+void 0==typeof global?""+void 0==typeof self?this:self:global);//AnonyCo//# sourceMappingURL=https://cdn.jsdelivr.net/gh/AnonyCo/FastestSmallestTextEncoderDecoder/EncoderDecoderTogether.min.js.map
@@ -438,12 +439,21 @@ The flatc generated classes are directly pasted into the rule which gives the fo
 
           let builder = new flatbuffers.Builder(1024);
 
-          let currentWeather =
-            CurrentWeather.createCurrentWeather(builder,
-              currentOutdoorTemperatureItem.numericState,
-              currentWindDirectionItem.numericState,
-              currentWindGustItem.numericState,
-              currentRelativeHumidityItem.numericState,
+          function getCurrentConditionValue(item, isConditionValid)
+          {
+            if (isConditionValid) 
+              return item.numericState 
+            else
+              return NaN;
+          }
+
+          let currentWeatherValid = currentOutdoorTemperatureItem.persistence.updatedSince(currentConditionsExpectedLastUpdate);
+          let currentWeather = 
+            CurrentWeather.createCurrentWeather(builder, 
+              getCurrentConditionValue(currentOutdoorTemperatureItem, currentWeatherValid),
+              getCurrentConditionValue(currentWindDirectionItem, currentWeatherValid), 
+              getCurrentConditionValue(currentWindGustItem, currentWeatherValid),
+              getCurrentConditionValue(currentRelativeHumidityItem, currentWeatherValid), 
               ((moonPhaseItem.numericState / 100) + .5) % 1
             );
 
@@ -497,8 +507,8 @@ The flatc generated classes are directly pasted into the rule which gives the fo
 
           function getPastWeather(pastTime)
           {
-            const rain = rain_cumulative.history.evolutionRateSince(pastTime);
-            const maxWindSpeed = getHistoricItemNumericValue(currentWindGustItem.history.maximumSince(pastTime), windSpeedUnit);
+            const rain = rain_cumulative.persistence.deltaSince(pastTime).numericState;
+            const maxWindSpeed = getHistoricItemNumericValue(currentWindGustItem.persistence.maximumSince(pastTime), windSpeedUnit);
 
             return PastWeather.createPastWeather(builder, maxWindSpeed, rain);
           }
